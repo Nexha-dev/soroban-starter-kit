@@ -16,6 +16,7 @@ import { useConnectivity } from './context/ConnectivityContext';
 import { useStorage } from './context/StorageContext';
 import { useTransactionQueue } from './context/TransactionQueueContext';
 import { DashboardBuilder } from './builder/DashboardBuilder';
+import { WorkflowLauncher } from './workflow';
 import type { ComponentType } from './builder/types';
 
 function App(): JSX.Element {
@@ -32,6 +33,7 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
+  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows'>('balances');
   const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search'>('balances');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState([{ label: 'Home' }]);
@@ -301,6 +303,13 @@ function App(): JSX.Element {
           >
             ✓ Synced History ({syncedTransactions.length})
           </button>
+          <button
+            onClick={() => setActiveTab('workflows')}
+            className={activeTab === 'workflows' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'workflows' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            🔀 Workflows
+          </button>
         </div>
 
         {/* Content Area */}
@@ -366,6 +375,14 @@ function App(): JSX.Element {
                   emptyMessage="No synced transactions yet."
                 />
               </>
+            )}
+
+            {activeTab === 'workflows' && (
+              <WorkflowLauncher
+                onComplete={(templateId, values) =>
+                  console.info('Workflow completed:', templateId, values)
+                }
+              />
             )}
           </div>
 
