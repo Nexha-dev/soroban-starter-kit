@@ -133,12 +133,15 @@ class PerformanceMetricsCollector {
    * Record custom metric
    */
   recordMetric(name: string, value: number, unit: string = 'ms'): void {
-    this.metrics.push({
+    const metric: PerformanceMetric = {
       name,
       value,
       timestamp: Date.now(),
       unit,
-    });
+    };
+    this.metrics.push(metric);
+    // Immediately capture a snapshot so getSnapshots() reflects the new metric
+    this.collectSnapshot();
   }
 
   /**

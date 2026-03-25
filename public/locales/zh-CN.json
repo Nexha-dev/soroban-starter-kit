@@ -1,0 +1,20 @@
+{
+  "locale": "zh-CN",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "余额",
+    "nav.pending": "待处理 ({count})",
+    "nav.history": "历史记录",
+    "nav.settings": "设置",
+    "common.loading": "加载中…",
+    "common.error": "发生错误",
+    "common.save": "保存",
+    "common.cancel": "取消",
+    "common.confirm": "确认",
+    "common.close": "关闭",
+    "tx.count": {
+      "one": "{{count}} 笔交易",
+      "other": "{{count}} 笔交易"
+    }
+  }
+}

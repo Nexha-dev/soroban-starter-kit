@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { performanceMetricsCollector } from '../services/performance/metricsCollector';
 import { performanceBudgetManager } from '../services/performance/budgetManager';
 import { performanceAnalyzer } from '../services/performance/analyzer';
+import { useBottlenecks, useRecommendations, usePerformanceViolations } from '../hooks/usePerformance';
 
 /**
  * Performance Monitoring Dashboard Component
@@ -10,7 +11,10 @@ export function PerformanceDashboard(): JSX.Element {
   const [vitals, setVitals] = useState<any>({});
   const [alerts, setAlerts] = useState<any[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
-  const [tab, setTab] = useState<'vitals' | 'alerts' | 'recommendations'>('vitals');
+  const [tab, setTab] = useState<'vitals' | 'alerts' | 'recommendations' | 'bottlenecks' | 'violations'>('vitals');
+  const bottlenecks = useBottlenecks();
+  const recommendations = useRecommendations();
+  const violations = usePerformanceViolations();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -92,6 +96,32 @@ export function PerformanceDashboard(): JSX.Element {
         >
           Recommendations
         </button>
+        <button
+          onClick={() => setTab('bottlenecks')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'bottlenecks' ? '#007bff' : '#ddd',
+            color: tab === 'bottlenecks' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Bottlenecks ({bottlenecks.length})
+        </button>
+        <button
+          onClick={() => setTab('violations')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'violations' ? '#007bff' : '#ddd',
+            color: tab === 'violations' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Violations ({violations.length})
+        </button>
       </div>
 
       {tab === 'vitals' && (
@@ -169,6 +199,42 @@ export function PerformanceDashboard(): JSX.Element {
             </>
           ) : (
             <p>No analysis available</p>
+          )}
+        </div>
+      )}
+
+      {tab === 'bottlenecks' && (
+        <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '4px' }}>
+          <h3>Bottlenecks</h3>
+          {bottlenecks.length === 0 ? (
+            <p>No bottlenecks detected</p>
+          ) : (
+            bottlenecks.map((b, idx) => (
+              <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                <p style={{ margin: '0 0 4px 0' }}><strong>{b.operationName}</strong> ({b.type})</p>
+                <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                  Mean: {b.meanDurationMs.toFixed(2)}ms &nbsp;|&nbsp; Percentile rank: {b.percentileRank.toFixed(1)}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {tab === 'violations' && (
+        <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '4px' }}>
+          <h3>Budget Violations</h3>
+          {violations.length === 0 ? (
+            <p>No violations recorded</p>
+          ) : (
+            violations.slice(-20).map((v, idx) => (
+              <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                <p style={{ margin: '0 0 4px 0' }}><strong>{v.metricName}</strong></p>
+                <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                  Measured: {v.measuredValue.toFixed(2)} &nbsp;|&nbsp; Threshold: {v.thresholdValue.toFixed(2)} &nbsp;|&nbsp; {new Date(v.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            ))
           )}
         </div>
       )}
