@@ -8,3 +8,6 @@ export { FilterPanel } from './FilterPanel';
 export { FacetedSearch } from './FacetedSearch';
 export { SavedSearches } from './SavedSearches';
 export { SearchPage } from './SearchPage';
+export { ResponsiveNav } from './ResponsiveNav';
+export { Breadcrumb } from './Breadcrumb';
+export { ContextualNav } from './ContextualNav';
