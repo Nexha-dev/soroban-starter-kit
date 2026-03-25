@@ -1,0 +1,20 @@
+{
+  "locale": "fr-FR",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "Soldes",
+    "nav.pending": "En attente ({count})",
+    "nav.history": "Historique",
+    "nav.settings": "Paramètres",
+    "common.loading": "Chargement…",
+    "common.error": "Une erreur s'est produite",
+    "common.save": "Enregistrer",
+    "common.cancel": "Annuler",
+    "common.confirm": "Confirmer",
+    "common.close": "Fermer",
+    "tx.count": {
+      "one": "{{count}} transaction",
+      "other": "{{count}} transactions"
+    }
+  }
+}

@@ -11,6 +11,7 @@ import { ResponsiveNav, Breadcrumb, ContextualNav, Dashboard, LiveDataFeed, Noti
 import { NavItem } from './services/navigation/types';
 import { DataPoint } from './services/visualization/types';
 import { ThemeToggle } from './components/ThemeToggle';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { TutorialOverlay, TutorialLauncher } from './components/TutorialOverlay';
 import { InstallBanner, PushToggle } from './components/PWAControls';
 import { useConnectivity } from './context/ConnectivityContext';
@@ -207,6 +208,7 @@ function App(): JSX.Element {
           <PushToggle />
           <TutorialLauncher />
           <ThemeToggle />
+          <LanguageSwitcher />
           <button
             className={builderMode ? 'btn btn-primary' : 'btn btn-secondary'}
             onClick={() => setBuilderMode((v) => !v)}
