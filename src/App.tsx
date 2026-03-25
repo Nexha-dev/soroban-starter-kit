@@ -8,6 +8,7 @@ import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
 import { ResponsiveNav, Breadcrumb, ContextualNav, Dashboard, LiveDataFeed, NotificationCenter, NotificationPreferences, AlertRules } from './components';
+import { PreferenceManagement, PreferenceAnalytics } from './components';
 import { NavItem } from './services/navigation/types';
 import { DataPoint } from './services/visualization/types';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -534,10 +535,17 @@ function App(): JSX.Element {
 
           {activeTab === 'settings' && (
             <>
-              <h2 className="mb-md">Settings</h2>
+              <h2 className="mb-md">Settings & Preferences</h2>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <NotificationPreferences userId="user-1" />
-                <AlertRules />
+                <div>
+                  <NotificationPreferences userId="user-1" />
+                </div>
+                <div>
+                  <AlertRules />
+                </div>
+              </div>
+              <div style={{ marginTop: '24px' }}>
+                <PreferenceManagement />
               </div>
             </>
           )}

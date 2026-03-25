@@ -28,3 +28,6 @@ export { PortfolioDashboard } from "./PortfolioDashboard";
 export { SecurityDashboard } from "./SecurityDashboard";
 export { TransactionHistory } from "./TransactionHistory";
 export { ContractInteraction } from "./ContractInteraction";
+export { PreferenceManagement } from "./PreferenceManagement";
+export { PreferenceAnalytics } from "./PreferenceAnalytics";
+export { UserOnboarding } from "./UserOnboarding";
