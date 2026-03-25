@@ -3,6 +3,18 @@
  * Manages performance budgets and alerting
  */
 
+import { Budget, BudgetViolation, InvalidBudgetError } from './types';
+
+const STORAGE_KEY_BUDGETS = 'perf:budgets';
+const STORAGE_KEY_VIOLATIONS = 'perf:violations';
+const PRUNE_WINDOW_MS = 86400000; // 24 hours
+
+const DEFAULT_THRESHOLDS: Record<string, number> = {
+  pageLoadTime: 3000,
+  contractRead: 200,
+  contractTx: 5000,
+};
+
 export interface PerformanceBudget {
   name: string;
   metric: string;
@@ -140,6 +152,91 @@ class PerformanceBudgetManager {
    */
   clearAlerts(): void {
     this.alerts = [];
+  }
+
+  // ---- New Budget/Violation API ----
+
+  /**
+   * Define a performance budget. Throws InvalidBudgetError if threshold <= 0.
+   */
+  defineBudget(budget: Budget): void {
+    if (budget.threshold <= 0) {
+      throw new InvalidBudgetError(
+        `Budget threshold must be > 0, got ${budget.threshold} for metric "${budget.metricName}"`
+      );
+    }
+    const budgets = this.readBudgets().filter(b => b.metricName !== budget.metricName);
+    budgets.push(budget);
+    this.writeBudgets(budgets);
+  }
+
+  /**
+   * Returns the threshold for a metric. Falls back to defaults, then Infinity.
+   */
+  getThreshold(metricName: string): number {
+    const budgets = this.readBudgets();
+    const found = budgets.find(b => b.metricName === metricName);
+    if (found) return found.threshold;
+    return DEFAULT_THRESHOLDS[metricName] ?? Infinity;
+  }
+
+  /**
+   * Records a budget violation, pruning entries older than 24h.
+   */
+  recordViolation(violation: BudgetViolation): void {
+    const cutoff = Date.now() - PRUNE_WINDOW_MS;
+    const violations = this.readViolations().filter(v => v.timestamp >= cutoff);
+    violations.push(violation);
+    this.writeViolations(violations);
+  }
+
+  /**
+   * Returns violations within [windowStart, windowEnd] (inclusive).
+   */
+  getViolations(windowStart: number, windowEnd: number): BudgetViolation[] {
+    return this.readViolations().filter(
+      v => v.timestamp >= windowStart && v.timestamp <= windowEnd
+    );
+  }
+
+  // ---- Private helpers ----
+
+  private readBudgets(): Budget[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_BUDGETS);
+      if (!raw) return [];
+      return JSON.parse(raw) as Budget[];
+    } catch (e) {
+      console.warn('perf:budgets parse error', e);
+      return [];
+    }
+  }
+
+  private writeBudgets(budgets: Budget[]): void {
+    try {
+      localStorage.setItem(STORAGE_KEY_BUDGETS, JSON.stringify(budgets));
+    } catch {
+      // silently no-op if localStorage unavailable
+    }
+  }
+
+  private readViolations(): BudgetViolation[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_VIOLATIONS);
+      if (!raw) return [];
+      return JSON.parse(raw) as BudgetViolation[];
+    } catch (e) {
+      console.warn('perf:violations parse error', e);
+      return [];
+    }
+  }
+
+  private writeViolations(violations: BudgetViolation[]): void {
+    try {
+      localStorage.setItem(STORAGE_KEY_VIOLATIONS, JSON.stringify(violations));
+    } catch {
+      // silently no-op if localStorage unavailable
+    }
   }
 }
 

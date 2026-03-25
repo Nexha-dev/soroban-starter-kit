@@ -1,0 +1,20 @@
+{
+  "locale": "es-ES",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "Saldos",
+    "nav.pending": "Pendiente ({count})",
+    "nav.history": "Historial",
+    "nav.settings": "Configuración",
+    "common.loading": "Cargando…",
+    "common.error": "Se produjo un error",
+    "common.save": "Guardar",
+    "common.cancel": "Cancelar",
+    "common.confirm": "Confirmar",
+    "common.close": "Cerrar",
+    "tx.count": {
+      "one": "{{count}} transacción",
+      "other": "{{count}} transacciones"
+    }
+  }
+}
