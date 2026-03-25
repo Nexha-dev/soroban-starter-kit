@@ -9,6 +9,9 @@ export { performanceMonitor, type PerformanceMetric, type PerformanceSummary } f
 
 // Storage Services
 export { storageService } from './storage';
+export { DBError } from './storage/errors';
+export type { DBHealthReport } from './storage/health';
+export type { UserRecord, SettingRecord } from './storage/schema';
 export type { Balance, EscrowData, CachedTransaction, UserPreferences, ConnectionStatus, SyncStatus } from './storage/types';
 
 // Transaction Queue
