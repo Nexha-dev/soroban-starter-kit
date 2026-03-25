@@ -37,7 +37,7 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows' | 'table'>('balances');
+  const [activeTab, setActiveTab] = useState<'balances' | 'analytics' | 'transfer' | 'build' | 'pending' | 'history' | 'workflows' | 'table' | 'search' | 'dashboard' | 'settings'>('balances');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [builderMode, setBuilderMode] = useState(false);
 
@@ -51,11 +51,6 @@ function App(): JSX.Element {
   ];
 
   // Demo function to simulate transaction submission
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard' | 'settings'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search'>('balances');
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState([{ label: 'Home' }]);
   const [chartData, setChartData] = useState<DataPoint[]>([]);
 
@@ -124,12 +119,6 @@ function App(): JSX.Element {
       },
     },
   ];
-  const [activeTab, setActiveTab] = useState<'balances' | 'analytics' | 'transfer' | 'build' | 'pending' | 'history'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'transfer' | 'build' | 'pending' | 'history'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'build' | 'pending' | 'history'>('balances');
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
-  const [builderMode, setBuilderMode] = useState(false);
-
   const handleSubmitTransaction = async (): Promise<void> => {
     setIsDemoLoading(true);
     try {
@@ -151,7 +140,7 @@ function App(): JSX.Element {
 
   const renderComponent = (type: ComponentType) => {
     switch (type) {
-      case 'balances':    return <BalanceList balances={balances} emptyMessage="No cached balances." />;
+      case 'balances':    return <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances." />;
       case 'transactions': return <TransactionList transactions={[...pendingTransactions, ...syncedTransactions]} onRetry={retryTransaction} onDelete={deleteTransaction} onResolveConflict={resolveConflict} emptyMessage="No transactions." />;
       case 'sync':        return <SyncStatus />;
       case 'actions':     return (
@@ -257,299 +246,85 @@ function App(): JSX.Element {
                   '+ Queue Transfer (Demo)'
                 )}
               </button>
-      {/* Main Content */}
-      <main className="main-content container">
-        {builderMode ? (
-          <DashboardBuilder renderComponent={renderComponent} />
-        ) : (
-        <>
-        {/* Demo Section - Create Transaction */}
-        <section className="card mb-lg">
-          <div className="card-header">
-            <span className="card-title">Quick Actions</span>
-          </div>
-          
-          <div className="flex gap-md items-center">
-            <button
-              onClick={handleSubmitTransaction}
-              disabled={isDemoLoading}
-              className="btn btn-primary"
-            >
-              {isDemoLoading ? (
-                <>
-                  <span className="spinner" style={{ width: '16px', height: '16px' }} />
-                  Creating...
-                </>
-              ) : (
-                '＋ Queue Transfer (Demo)'
-              )}
-            </button>
-            
-            <button
-              onClick={syncNow}
-              disabled={!isOnline || syncStatus.isSyncing}
-              className="btn btn-secondary"
-            >
-              {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
-            </button>
-            
-            <span className="text-muted" style={{ marginLeft: 'auto' }}>
-              {pendingTransactions.length} pending • {syncedTransactions.length} synced
-            </span>
-          </div>
-        </section>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-md mb-lg" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>
-          <button
-            onClick={() => setActiveTab('balances')}
-            className={activeTab === 'balances' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'balances' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            📊 Cached Balances
-          </button>
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={activeTab === 'analytics' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'analytics' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            📈 Analytics
-          </button>
-          <button
-            onClick={() => setActiveTab('transfer')}
-            className={activeTab === 'transfer' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'transfer' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            💸 Transfer
-          </button>
-          <button
-            onClick={() => setActiveTab('build')}
-            className={activeTab === 'build' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'build' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            🔨 Build Transaction
-          </button>
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={activeTab === 'pending' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'pending' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            ⏳ Pending ({pendingTransactions.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={activeTab === 'history' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'history' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            ✓ Synced History ({syncedTransactions.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('workflows')}
-            className={activeTab === 'workflows' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'workflows' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            🔀 Workflows
-          </button>
-          <button
-            onClick={() => setActiveTab('table')}
-            className={activeTab === 'table' ? 'btn btn-primary' : 'btn btn-secondary'}
-            style={{ backgroundColor: activeTab === 'table' ? 'var(--color-highlight)' : 'transparent' }}
-          >
-            📋 Table View
-          </button>
-        </div>
-
-        {/* Content Area */}
-        <div className="grid" style={{ gridTemplateColumns: '1fr 300px' }}>
-          {/* Main Panel */}
-          <div>
-            {activeTab === 'balances' && (
-              <>
-                {!isOnline && (
-                  <p className="text-warning mb-md">
-                    You're offline. Showing cached balances from your last online session.
-                  </p>
-                )}
-                <AdvancedBalanceDisplay
-                  balances={balances}
-                  emptyMessage="No cached balances. Connect to the network to fetch your balances."
-                />
-                {balances.length === 0 && (
-                  <div className="card mt-lg" style={{ textAlign: 'center' }}>
-                    <p className="text-muted">
-                      💡 In a real app, your token balances will be cached automatically when you go offline.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
-            {activeTab === 'analytics' && (
-              <PortfolioDashboard />
-            )}
-
-            {activeTab === 'transfer' && (
-              <TokenTransferWizard />
-            )}
-
-            {activeTab === 'build' && (
-              <TransactionFormBuilder />
-            )}
-
-            {activeTab === 'pending' && (
-              <>
-                <h2 className="mb-md">Pending Transactions</h2>
-                {!isOnline && (
-                  <p className="text-warning mb-md">
-                    You're offline. Transactions will be queued and submitted when connection is restored.
-                  </p>
-                )}
-                <TransactionList
-                  transactions={pendingTransactions}
-                  onRetry={retryTransaction}
-                  onDelete={deleteTransaction}
-                  onResolveConflict={resolveConflict}
-                  emptyMessage="No pending transactions. Your transactions will appear here when queued."
-                />
-              </>
-            )}
-
-            {activeTab === 'history' && (
-              <>
-                <h2 className="mb-md">Synced Transactions</h2>
-                <TransactionList
-                  transactions={syncedTransactions}
-                  emptyMessage="No synced transactions yet."
-                />
-              </>
-            )}
-
-            {activeTab === 'workflows' && (
-              <WorkflowLauncher
-                onComplete={(templateId, values) =>
-                  console.info('Workflow completed:', templateId, values)
-                }
-              />
-            )}
-
-            {activeTab === 'table' && (
-              <DataTable
-                caption="All Transactions"
-                data={[...pendingTransactions, ...syncedTransactions]}
-                columns={txColumns}
-                getRowId={(r) => r.id}
-                bulkActions={[{ label: 'Delete selected', icon: '🗑', action: (rows) => rows.forEach((r) => deleteTransaction(r.id)) }]}
-                exportFormats={['csv', 'json']}
-                renderExpanded={(r) => (
-                  <pre style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
-                    {JSON.stringify(r.params, null, 2)}
-                  </pre>
-                )}
-              />
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div>
-            <SyncStatus />
-            
-            {/* Storage Info */}
-            <div className="card mt-lg">
-              <div className="card-header">
-                <span className="card-title">Storage</span>
-              </div>
-              
-              <button
-                onClick={syncNow}
-                disabled={!isOnline || syncStatus.isSyncing}
-                className="btn btn-secondary"
-              >
-                {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
-              </button>
-              
-              <span className="text-muted" style={{ marginLeft: 'auto' }}>
-                {pendingTransactions.length} pending • {syncedTransactions.length} synced
-              </span>
             </div>
           </section>
 
-          {activeTab === 'balances' && (
-            <>
-              <h2 className="mb-md">Token Balances</h2>
-              {isOnline ? (
-                <p className="text-muted mb-md">You're online. Balances are fetched from the network.</p>
-              ) : (
-                <p className="text-warning mb-md">You're offline. Showing cached balances.</p>
+          {/* Tab Navigation */}
+          <div className="flex gap-md mb-lg" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>
+            <button onClick={() => setActiveTab('balances')} className={activeTab === 'balances' ? 'btn btn-primary' : 'btn btn-secondary'}>📊 Cached Balances</button>
+            <button onClick={() => setActiveTab('analytics')} className={activeTab === 'analytics' ? 'btn btn-primary' : 'btn btn-secondary'}>📈 Analytics</button>
+            <button onClick={() => setActiveTab('transfer')} className={activeTab === 'transfer' ? 'btn btn-primary' : 'btn btn-secondary'}>💸 Transfer</button>
+            <button onClick={() => setActiveTab('build')} className={activeTab === 'build' ? 'btn btn-primary' : 'btn btn-secondary'}>🔨 Build Transaction</button>
+            <button onClick={() => setActiveTab('pending')} className={activeTab === 'pending' ? 'btn btn-primary' : 'btn btn-secondary'}>⏳ Pending ({pendingTransactions.length})</button>
+            <button onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'btn btn-primary' : 'btn btn-secondary'}>✓ Synced History ({syncedTransactions.length})</button>
+            <button onClick={() => setActiveTab('workflows')} className={activeTab === 'workflows' ? 'btn btn-primary' : 'btn btn-secondary'}>🔀 Workflows</button>
+            <button onClick={() => setActiveTab('table')} className={activeTab === 'table' ? 'btn btn-primary' : 'btn btn-secondary'}>📋 Table View</button>
+          </div>
+
+          {/* Content Area */}
+          <div className="grid" style={{ gridTemplateColumns: '1fr 300px' }}>
+            {/* Main Panel */}
+            <div>
+              {activeTab === 'balances' && (
+                <>
+                  {!isOnline && <p className="text-warning mb-md">You're offline. Showing cached balances from your last online session.</p>}
+                  <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances. Connect to the network to fetch your balances." />
+                </>
               )}
-              <BalanceList 
-                balances={balances}
-                emptyMessage="No cached balances."
-              />
-            </>
-          )}
-
-          {activeTab === 'pending' && (
-            <>
-              <h2 className="mb-md">Pending Transactions</h2>
-              {!isOnline && (
-                <p className="text-warning mb-md">You're offline. Transactions will sync when connection restores.</p>
+              {activeTab === 'analytics' && <PortfolioDashboard />}
+              {activeTab === 'transfer' && <TokenTransferWizard />}
+              {activeTab === 'build' && <TransactionFormBuilder />}
+              {activeTab === 'pending' && (
+                <>
+                  <h2 className="mb-md">Pending Transactions</h2>
+                  {!isOnline && <p className="text-warning mb-md">You're offline. Transactions will be queued and submitted when connection is restored.</p>}
+                  <TransactionList transactions={pendingTransactions} onRetry={retryTransaction} onDelete={deleteTransaction} onResolveConflict={resolveConflict} emptyMessage="No pending transactions." />
+                </>
               )}
-              <TransactionList
-                transactions={pendingTransactions}
-                onRetry={retryTransaction}
-                onDelete={deleteTransaction}
-                onResolveConflict={resolveConflict}
-                emptyMessage="No pending transactions."
-              />
-            </>
-          )}
+              {activeTab === 'history' && (
+                <>
+                  <h2 className="mb-md">Synced Transactions</h2>
+                  <TransactionList transactions={syncedTransactions} emptyMessage="No synced transactions yet." />
+                </>
+              )}
+              {activeTab === 'workflows' && (
+                <WorkflowLauncher onComplete={(templateId, values) => console.info('Workflow completed:', templateId, values)} />
+              )}
+              {activeTab === 'table' && (
+                <DataTable
+                  caption="All Transactions"
+                  data={[...pendingTransactions, ...syncedTransactions]}
+                  columns={txColumns}
+                  getRowId={(r) => r.id}
+                  bulkActions={[{ label: 'Delete selected', icon: '🗑', action: (rows) => rows.forEach((r) => deleteTransaction(r.id)) }]}
+                  exportFormats={['csv', 'json']}
+                  renderExpanded={(r) => (
+                    <pre style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
+                      {JSON.stringify(r.params, null, 2)}
+                    </pre>
+                  )}
+                />
+              )}
+            </div>
 
-          {activeTab === 'history' && (
-            <>
-              <h2 className="mb-md">Synced Transactions</h2>
-              <TransactionList
-                transactions={syncedTransactions}
-                emptyMessage="No synced transactions yet."
-              />
-            </>
-          )}
-
-          {activeTab === 'search' && (
-            <SearchPage
-              transactions={[...pendingTransactions, ...syncedTransactions]}
-              balances={balances}
-              escrows={escrows}
-            />
-          )}
-
-          {activeTab === 'dashboard' && (
-            <>
-              <h2 className="mb-md">Real-Time Dashboard</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', marginBottom: '16px' }}>
-                <Dashboard />
-                <LiveDataFeed onDataUpdate={(data) => setChartData([...chartData, data])} />
+            {/* Sidebar */}
+            <div>
+              <SyncStatus />
+              <div className="card mt-lg">
+                <div className="card-header">
+                  <span className="card-title">Storage</span>
+                </div>
+                <button onClick={syncNow} disabled={!isOnline || syncStatus.isSyncing} className="btn btn-secondary">
+                  {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+                <span className="text-muted" style={{ marginLeft: 'auto' }}>
+                  {pendingTransactions.length} pending • {syncedTransactions.length} synced
+                </span>
               </div>
-            </>
-          )}
-
-          {activeTab === 'settings' && (
-            <>
-              <h2 className="mb-md">Settings</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <NotificationPreferences userId="user-1" />
-                <AlertRules />
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </main>
       </div>
-          </div>
-        </div>
-        </>
-        )}
-      </main>
-
-      <TutorialOverlay />
     </div>
   );
 }
