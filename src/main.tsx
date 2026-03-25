@@ -6,19 +6,22 @@ import { StorageProvider } from './context/StorageContext';
 import { TransactionQueueProvider } from './context/TransactionQueueContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { TutorialProvider } from './context/TutorialContext';
+import { PWAProvider } from './context/PWAContext';
 import './styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
       <TutorialProvider>
-        <ConnectivityProvider>
-          <StorageProvider>
-            <TransactionQueueProvider>
-              <App />
-            </TransactionQueueProvider>
-          </StorageProvider>
-        </ConnectivityProvider>
+        <PWAProvider>
+          <ConnectivityProvider>
+            <StorageProvider>
+              <TransactionQueueProvider>
+                <App />
+              </TransactionQueueProvider>
+            </StorageProvider>
+          </ConnectivityProvider>
+        </PWAProvider>
       </TutorialProvider>
     </ThemeProvider>
   </React.StrictMode>

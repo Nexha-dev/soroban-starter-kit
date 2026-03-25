@@ -8,6 +8,7 @@ import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { ThemeToggle } from './components/ThemeToggle';
 import { TutorialOverlay, TutorialLauncher } from './components/TutorialOverlay';
+import { InstallBanner, PushToggle } from './components/PWAControls';
 import { useConnectivity } from './context/ConnectivityContext';
 import { useStorage } from './context/StorageContext';
 import { useTransactionQueue } from './context/TransactionQueueContext';
@@ -98,6 +99,11 @@ function App(): JSX.Element {
       {/* Offline Banner */}
       <OfflineBanner />
 
+      {/* Install Banner */}
+      <div className="container">
+        <InstallBanner />
+      </div>
+
       {/* Header */}
       <header className="header container">
         <div className="flex items-center gap-md">
@@ -108,6 +114,7 @@ function App(): JSX.Element {
         <div className="flex items-center gap-md">
           <OfflineIndicator />
           <ConnectivityStatus />
+          <PushToggle />
           <TutorialLauncher />
           <ThemeToggle />
           <button
