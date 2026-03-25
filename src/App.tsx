@@ -18,6 +18,9 @@ import { useStorage } from './context/StorageContext';
 import { useTransactionQueue } from './context/TransactionQueueContext';
 import { DashboardBuilder } from './builder/DashboardBuilder';
 import { WorkflowLauncher } from './workflow';
+import { DataTable } from './table';
+import type { ColumnDef } from './table';
+import type { CachedTransaction } from './services/storage/types';
 import type { ComponentType } from './builder/types';
 
 function App(): JSX.Element {
@@ -34,6 +37,20 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
+  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows' | 'table'>('balances');
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const [builderMode, setBuilderMode] = useState(false);
+
+  const txColumns: ColumnDef<CachedTransaction>[] = [
+    { key: 'id',        header: 'ID',       accessor: (r) => r.id,        sortable: true  },
+    { key: 'type',      header: 'Type',     accessor: (r) => r.type,      sortable: true  },
+    { key: 'status',    header: 'Status',   accessor: (r) => r.status,    sortable: true  },
+    { key: 'contract',  header: 'Contract', accessor: (r) => r.contractId, sortable: false },
+    { key: 'createdAt', header: 'Created',  accessor: (r) => new Date(r.createdAt).toLocaleString(), sortable: true },
+    { key: 'retries',   header: 'Retries',  accessor: (r) => r.retryCount, sortable: true  },
+  ];
+
+  // Demo function to simulate transaction submission
   const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard' | 'settings'>('balances');
   const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard'>('balances');
   const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows'>('balances');
@@ -333,6 +350,13 @@ function App(): JSX.Element {
           >
             🔀 Workflows
           </button>
+          <button
+            onClick={() => setActiveTab('table')}
+            className={activeTab === 'table' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'table' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            📋 Table View
+          </button>
         </div>
 
         {/* Content Area */}
@@ -405,6 +429,22 @@ function App(): JSX.Element {
                 onComplete={(templateId, values) =>
                   console.info('Workflow completed:', templateId, values)
                 }
+              />
+            )}
+
+            {activeTab === 'table' && (
+              <DataTable
+                caption="All Transactions"
+                data={[...pendingTransactions, ...syncedTransactions]}
+                columns={txColumns}
+                getRowId={(r) => r.id}
+                bulkActions={[{ label: 'Delete selected', icon: '🗑', action: (rows) => rows.forEach((r) => deleteTransaction(r.id)) }]}
+                exportFormats={['csv', 'json']}
+                renderExpanded={(r) => (
+                  <pre style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
+                    {JSON.stringify(r.params, null, 2)}
+                  </pre>
+                )}
               />
             )}
           </div>
