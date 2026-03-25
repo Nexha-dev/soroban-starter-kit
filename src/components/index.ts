@@ -5,3 +5,8 @@ export { BalanceDisplay, BalanceList } from './BalanceDisplay';
 export { SyncStatus, OfflineIndicator } from './SyncStatus';
 export { ThemeToggle } from './ThemeToggle';
 export { TutorialOverlay, TutorialLauncher } from './TutorialOverlay';
+export { FormField } from './FormField';
+export { AdvancedBalanceDisplay } from './AdvancedBalanceDisplay';
+export { TransactionFormBuilder } from './TransactionFormBuilder';
+export { TokenTransferWizard } from './TokenTransferWizard';
+export { PortfolioDashboard } from './PortfolioDashboard';

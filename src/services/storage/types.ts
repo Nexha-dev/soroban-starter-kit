@@ -10,6 +10,19 @@ export interface Balance {
   tokenSymbol: string;
   amount: string;
   lastUpdated: number;
+  // Advanced display fields (optional)
+  previousAmount?: string;
+  previousUpdated?: number;
+  fiatRates?: Record<string, number>; // e.g. { USD: 0.12, EUR: 0.11 }
+  alertThreshold?: number; // in stroops
+}
+
+export interface BalanceDisplayPreferences {
+  currency: string;
+  showFiat: boolean;
+  showChange: boolean;
+  hideBalance: boolean;
+  alertsEnabled: boolean;
 }
 
 // Escrow types
