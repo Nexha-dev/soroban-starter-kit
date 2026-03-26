@@ -23,6 +23,7 @@ function vitalStatus(metric: string, value: number): '✅' | '⚠️' | '❌' {
   if (value <= poor) return '⚠️';
   return '❌';
 }
+import { useBottlenecks, useRecommendations, usePerformanceViolations } from '../hooks/usePerformance';
 
 /**
  * Performance Optimization Dashboard
@@ -38,6 +39,10 @@ export function PerformanceDashboard(): JSX.Element {
   const [cacheStats, setCacheStats] = useState<any[]>([]);
   const [uxInsights, setUxInsights] = useState<any[]>([]);
   const [uxCorrelations, setUxCorrelations] = useState<any[]>([]);
+  const [tab, setTab] = useState<'vitals' | 'alerts' | 'recommendations' | 'bottlenecks' | 'violations'>('vitals');
+  const bottlenecks = useBottlenecks();
+  const recommendations = useRecommendations();
+  const violations = usePerformanceViolations();
 
   const refresh = useCallback(() => {
     const currentVitals = performanceMetricsCollector.getVitals() as Record<string, number>;
@@ -101,6 +106,75 @@ export function PerformanceDashboard(): JSX.Element {
             {t === 'alerts' ? `Alerts (${alerts.length})` : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
+    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+      <h2>Performance Dashboard</h2>
+
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <button
+          onClick={() => setTab('vitals')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'vitals' ? '#007bff' : '#ddd',
+            color: tab === 'vitals' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Core Web Vitals
+        </button>
+        <button
+          onClick={() => setTab('alerts')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'alerts' ? '#007bff' : '#ddd',
+            color: tab === 'alerts' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Alerts ({alerts.length})
+        </button>
+        <button
+          onClick={() => setTab('recommendations')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'recommendations' ? '#007bff' : '#ddd',
+            color: tab === 'recommendations' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Recommendations
+        </button>
+        <button
+          onClick={() => setTab('bottlenecks')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'bottlenecks' ? '#007bff' : '#ddd',
+            color: tab === 'bottlenecks' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Bottlenecks ({bottlenecks.length})
+        </button>
+        <button
+          onClick={() => setTab('violations')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: tab === 'violations' ? '#007bff' : '#ddd',
+            color: tab === 'violations' ? 'white' : 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Violations ({violations.length})
+        </button>
       </div>
 
       {/* Core Web Vitals */}
@@ -333,6 +407,42 @@ export function PerformanceDashboard(): JSX.Element {
               <span>{budget.threshold}{budget.unit} <span style={badge(budget.enabled ? '#28a745' : '#6c757d')}>{budget.enabled ? 'on' : 'off'}</span></span>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === 'bottlenecks' && (
+        <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '4px' }}>
+          <h3>Bottlenecks</h3>
+          {bottlenecks.length === 0 ? (
+            <p>No bottlenecks detected</p>
+          ) : (
+            bottlenecks.map((b, idx) => (
+              <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                <p style={{ margin: '0 0 4px 0' }}><strong>{b.operationName}</strong> ({b.type})</p>
+                <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                  Mean: {b.meanDurationMs.toFixed(2)}ms &nbsp;|&nbsp; Percentile rank: {b.percentileRank.toFixed(1)}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {tab === 'violations' && (
+        <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '4px' }}>
+          <h3>Budget Violations</h3>
+          {violations.length === 0 ? (
+            <p>No violations recorded</p>
+          ) : (
+            violations.slice(-20).map((v, idx) => (
+              <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                <p style={{ margin: '0 0 4px 0' }}><strong>{v.metricName}</strong></p>
+                <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                  Measured: {v.measuredValue.toFixed(2)} &nbsp;|&nbsp; Threshold: {v.thresholdValue.toFixed(2)} &nbsp;|&nbsp; {new Date(v.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

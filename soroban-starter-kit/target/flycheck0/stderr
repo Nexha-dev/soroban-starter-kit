@@ -1,0 +1,371 @@
+   0.092570982s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban_escrow_template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("soroban_escrow_template", ["cdylib"], "/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow/src/lib.rs", Edition2021) }
+   0.092594675s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban_escrow_template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-escrow-template-d0dcde08f88fde61/lib-soroban_escrow_template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.167477284s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban_escrow_template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow)/Check { test: true }/TargetInner { name_inferred: true, ..: lib_target("soroban_escrow_template", ["cdylib"], "/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow/src/lib.rs", Edition2021) }
+   0.167493628s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban_escrow_template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-escrow-template-217c548599f50081/test-lib-soroban_escrow_template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.168529346s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban-escrow-template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow)/Check { test: false }/TargetInner { name: "soroban-escrow-template", doc: true, ..: with_path("/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow/src/bin/main.rs", Edition2021) }
+   0.168545679s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban-escrow-template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-escrow-template-25bad90b74c82b68/bin-soroban-escrow-template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.169247252s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban-escrow-template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow)/Check { test: true }/TargetInner { name: "soroban-escrow-template", doc: true, ..: with_path("/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow/src/bin/main.rs", Edition2021) }
+   0.169260918s  INFO prepare_target{force=false package_id=soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow) target="soroban-escrow-template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-escrow-template-fa5bd196c8fd7069/test-bin-soroban-escrow-template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.169901010s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban_token_template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("soroban_token_template", ["cdylib"], "/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token/src/lib.rs", Edition2021) }
+   0.169914609s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban_token_template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-token-template-7e93f31e825ebb6a/lib-soroban_token_template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.170674066s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban_token_template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token)/Check { test: true }/TargetInner { name_inferred: true, ..: lib_target("soroban_token_template", ["cdylib"], "/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token/src/lib.rs", Edition2021) }
+   0.170690446s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban_token_template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-token-template-1a74bd8c30b43bec/test-lib-soroban_token_template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.171425374s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban-token-template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token)/Check { test: false }/TargetInner { name: "soroban-token-template", doc: true, ..: with_path("/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token/src/bin/main.rs", Edition2021) }
+   0.171438475s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban-token-template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-token-template-b7ab30015c949356/bin-soroban-token-template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+   0.172122829s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban-token-template"}: cargo::core::compiler::fingerprint: fingerprint error for soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token)/Check { test: true }/TargetInner { name: "soroban-token-template", doc: true, ..: with_path("/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token/src/bin/main.rs", Edition2021) }
+   0.172135227s  INFO prepare_target{force=false package_id=soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token) target="soroban-token-template"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/.fingerprint/soroban-token-template-a3f77a84d77b501e/test-bin-soroban-token-template`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/ops/function.rs:290:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  16: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  17: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:589:40
+  20: std::panicking::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panicking.rs:552:19
+  21: std::panic::catch_unwind
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+    Checking soroban-escrow-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/escrow)
+    Checking soroban-token-template v0.1.0 (/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/contracts/token)
+error: could not compile `soroban-token-template` (bin "soroban-token-template") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `soroban-escrow-template` (bin "soroban-escrow-template") due to 1 previous error
+error: could not compile `soroban-escrow-template` (bin "soroban-escrow-template" test) due to 1 previous error
+error: could not compile `soroban-token-template` (bin "soroban-token-template" test) due to 1 previous error
+error: could not compile `soroban-escrow-template` (lib) due to 16 previous errors
+error: could not compile `soroban-escrow-template` (lib test) due to 27 previous errors
+error: could not compile `soroban-token-template` (lib) due to 18 previous errors
+error: could not compile `soroban-token-template` (lib test) due to 18 previous errors

@@ -45,6 +45,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "fake-indexeddb": "^6.2.5",
+    "fast-check": "^4.6.0",
     "jsdom": "^29.0.1",
     "msw": "^2.12.14",
     "prettier": "^3.8.1",
