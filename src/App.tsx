@@ -5,6 +5,16 @@ import { TransactionList } from './components/TransactionItem';
 import { AdvancedBalanceDisplay } from './components/AdvancedBalanceDisplay';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
+import {
+  ResponsiveNav,
+  Breadcrumb,
+  ContextualNav,
+  Dashboard,
+  LiveDataFeed,
+  NotificationCenter,
+  NotificationPreferences,
+  AlertRules,
+} from './components';
 import { ResponsiveNav, Breadcrumb, ContextualNav, Dashboard, LiveDataFeed, NotificationCenter, NotificationPreferences, AlertRules } from './components';
 import { PreferenceManagement, PreferenceAnalytics } from './components';
 import { NavItem } from './services/navigation/types';
@@ -13,6 +23,8 @@ import { ThemeCustomizer } from './components/ThemeCustomizer';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { TutorialOverlay, TutorialLauncher } from './components/TutorialOverlay';
+import { HelpPanel } from './components/HelpPanel';
+import { InstallBanner, PushToggle } from './components/PWAControls';
 import { InstallBanner } from './components/PWAControls';
 import { PWADashboard } from './components/PWADashboard';
 import { useConnectivity } from './context/ConnectivityContext';
@@ -23,6 +35,7 @@ import type { ColumnDef } from './table';
 import type { CachedTransaction } from './services/storage/types';
 import type { ComponentType } from './builder/types';
 
+type Tab =
 type ActiveTab =
   | 'balances'
   | 'analytics'
@@ -34,6 +47,8 @@ type ActiveTab =
   | 'table'
   | 'search'
   | 'dashboard'
+  | 'settings'
+  | 'help';
   | 'settings';
 // Lazy-loaded heavy components for code splitting
 const TransactionFormBuilder = lazy(() => import('./components/TransactionFormBuilder').then(m => ({ default: m.TransactionFormBuilder })));
@@ -62,6 +77,7 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
+  const [activeTab, setActiveTab] = useState<Tab>('balances');
   const [activeTab, setActiveTab] = useState<ActiveTab>('balances');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [builderMode, setBuilderMode] = useState(false);
@@ -77,11 +93,74 @@ function App(): JSX.Element {
     { key: 'retries',   header: 'Retries',  accessor: (r) => r.retryCount, sortable: true  },
   ];
 
+  const handleSubmitTransaction = async (): Promise<void> => {
+    setIsDemoLoading(true);
+    try {
+      await createTransaction('transfer', 'CONTRACT_ID_HERE', 'transfer', {
+        to: 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+        amount: '10000000',
+      });
+    } catch (error) {
+      console.error('Failed to create transaction:', error);
+    } finally {
+      setIsDemoLoading(false);
+    }
+  };
+
+  const navigate = (tab: Tab, crumbs: { label: string }[]): void => {
+    setActiveTab(tab);
+    setBreadcrumbs(crumbs);
+  };
+
+  const renderComponent = (type: ComponentType) => {
+    switch (type) {
+      case 'balances':
+        return <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances." />;
+      case 'transactions':
+        return (
+          <TransactionList
+            transactions={[...pendingTransactions, ...syncedTransactions]}
+            onRetry={retryTransaction}
+            onDelete={deleteTransaction}
+            onResolveConflict={resolveConflict}
+            emptyMessage="No transactions."
+          />
+        );
+      case 'sync':
+        return <SyncStatus />;
+      case 'actions':
+        return (
+          <div className="flex gap-md items-center">
+            <button onClick={handleSubmitTransaction} disabled={isDemoLoading} className="btn btn-primary">
+              {isDemoLoading ? 'Creating...' : '＋ Queue Transfer (Demo)'}
+            </button>
+            <button onClick={syncNow} disabled={!isOnline || syncStatus.isSyncing} className="btn btn-secondary">
+              {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+            </button>
+          </div>
+        );
+      case 'storage':
+        return (
+          <div className="flex flex-col gap-sm">
+            <div className="flex justify-between">
+              <span className="text-muted">Cached Items</span>
+              <span>{balances.length + escrows.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Transactions</span>
+              <span>{pendingTransactions.length + syncedTransactions.length}</span>
+            </div>
+          </div>
+        );
+    }
+  };
+
   const navItems: NavItem[] = [
     {
       id: 'balances',
       label: 'Balances',
       icon: '📊',
+      onClick: () => navigate('balances', [{ label: 'Home' }, { label: 'Balances' }]),
       onClick: () => { setActiveTab('balances'); setBreadcrumbs([{ label: 'Home' }, { label: 'Balances' }]); },
     },
     {
@@ -94,6 +173,7 @@ function App(): JSX.Element {
           label: 'Pending',
           icon: '⏳',
           badge: pendingTransactions.length,
+          onClick: () => navigate('pending', [{ label: 'Home' }, { label: 'Transactions' }, { label: 'Pending' }]),
           onClick: () => { setActiveTab('pending'); setBreadcrumbs([{ label: 'Home' }, { label: 'Transactions' }, { label: 'Pending' }]); },
         },
         {
@@ -101,19 +181,53 @@ function App(): JSX.Element {
           label: 'History',
           icon: '✓',
           badge: syncedTransactions.length,
+          onClick: () => navigate('history', [{ label: 'Home' }, { label: 'Transactions' }, { label: 'History' }]),
           onClick: () => { setActiveTab('history'); setBreadcrumbs([{ label: 'Home' }, { label: 'Transactions' }, { label: 'History' }]); },
         },
       ],
     },
     {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: '📈',
+      onClick: () => navigate('analytics', [{ label: 'Home' }, { label: 'Analytics' }]),
+    },
+    {
+      id: 'transfer',
+      label: 'Transfer',
+      icon: '💸',
+      onClick: () => navigate('transfer', [{ label: 'Home' }, { label: 'Transfer' }]),
+    },
+    {
+      id: 'build',
+      label: 'Build Tx',
+      icon: '🔨',
+      onClick: () => navigate('build', [{ label: 'Home' }, { label: 'Build Transaction' }]),
+    },
+    {
+      id: 'workflows',
+      label: 'Workflows',
+      icon: '🔀',
+      onClick: () => navigate('workflows', [{ label: 'Home' }, { label: 'Workflows' }]),
+    },
+    {
+      id: 'table',
+      label: 'Table View',
+      icon: '📋',
+      onClick: () => navigate('table', [{ label: 'Home' }, { label: 'Table View' }]),
+    },
+    {
       id: 'search',
       label: 'Search',
       icon: '🔍',
+      onClick: () => navigate('search', [{ label: 'Home' }, { label: 'Search' }]),
       onClick: () => { setActiveTab('search'); setBreadcrumbs([{ label: 'Home' }, { label: 'Search' }]); },
     },
     {
       id: 'dashboard',
       label: 'Dashboard',
+      icon: '📊',
+      onClick: () => navigate('dashboard', [{ label: 'Home' }, { label: 'Dashboard' }]),
       icon: '📈',
       onClick: () => { setActiveTab('dashboard'); setBreadcrumbs([{ label: 'Home' }, { label: 'Dashboard' }]); },
     },
@@ -121,6 +235,15 @@ function App(): JSX.Element {
       id: 'settings',
       label: 'Settings',
       icon: '⚙️',
+      onClick: () => navigate('settings', [{ label: 'Home' }, { label: 'Settings' }]),
+    },
+    {
+      id: 'help',
+      label: 'Help',
+      icon: '❓',
+      onClick: () => navigate('help', [{ label: 'Home' }, { label: 'Help' }]),
+    },
+  ];
       onClick: () => { setActiveTab('settings'); setBreadcrumbs([{ label: 'Home' }, { label: 'Settings' }]); },
     },
     {
@@ -491,13 +614,178 @@ function App(): JSX.Element {
 
           {activeTab === 'balances' && (
             <>
-              <h2 className="mb-md">Token Balances</h2>
-              {isOnline ? (
-                <p className="text-muted mb-md">You're online. Balances are fetched from the network.</p>
-              ) : (
-                <p className="text-warning mb-md">You're offline. Showing cached balances.</p>
+              {/* Quick Actions */}
+              <section className="card mb-lg">
+                <div className="card-header">
+                  <span className="card-title">Quick Actions</span>
+                </div>
+                <div className="flex gap-md items-center">
+                  <button onClick={handleSubmitTransaction} disabled={isDemoLoading} className="btn btn-primary">
+                    {isDemoLoading ? (
+                      <>
+                        <span className="spinner" style={{ width: '16px', height: '16px' }} />
+                        Creating...
+                      </>
+                    ) : (
+                      '＋ Queue Transfer (Demo)'
+                    )}
+                  </button>
+                  <button onClick={syncNow} disabled={!isOnline || syncStatus.isSyncing} className="btn btn-secondary">
+                    {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+                  </button>
+                  <span className="text-muted" style={{ marginLeft: 'auto' }}>
+                    {pendingTransactions.length} pending • {syncedTransactions.length} synced
+                  </span>
+                </div>
+              </section>
+
+              {activeTab === 'balances' && (
+                <ContextualNav
+                  context="Quick Actions"
+                  items={[
+                    { id: 'sync', label: 'Sync Now', icon: '🔄', onClick: syncNow },
+                    { id: 'add', label: 'Add Balance', icon: '➕', onClick: () => {} },
+                  ]}
+                />
               )}
 
+              <div className="grid" style={{ gridTemplateColumns: '1fr 300px', gap: 'var(--spacing-lg)' }}>
+                <div>
+                  {activeTab === 'balances' && (
+                    <>
+                      {!isOnline && (
+                        <p className="text-warning mb-md">
+                          You're offline. Showing cached balances from your last online session.
+                        </p>
+                      )}
+                      <AdvancedBalanceDisplay
+                        balances={balances}
+                        emptyMessage="No cached balances. Connect to the network to fetch your balances."
+                      />
+                    </>
+                  )}
+
+                  {activeTab === 'analytics' && <PortfolioDashboard />}
+
+                  {activeTab === 'transfer' && <TokenTransferWizard />}
+
+                  {activeTab === 'build' && <TransactionFormBuilder />}
+
+                  {activeTab === 'pending' && (
+                    <>
+                      <h2 className="mb-md">Pending Transactions</h2>
+                      {!isOnline && (
+                        <p className="text-warning mb-md">
+                          You're offline. Transactions will be queued and submitted when connection is restored.
+                        </p>
+                      )}
+                      <TransactionList
+                        transactions={pendingTransactions}
+                        onRetry={retryTransaction}
+                        onDelete={deleteTransaction}
+                        onResolveConflict={resolveConflict}
+                        emptyMessage="No pending transactions."
+                      />
+                    </>
+                  )}
+
+                  {activeTab === 'history' && (
+                    <>
+                      <h2 className="mb-md">Synced Transactions</h2>
+                      <TransactionList
+                        transactions={syncedTransactions}
+                        emptyMessage="No synced transactions yet."
+                      />
+                    </>
+                  )}
+
+                  {activeTab === 'workflows' && (
+                    <WorkflowLauncher
+                      onComplete={(templateId, values) =>
+                        console.info('Workflow completed:', templateId, values)
+                      }
+                    />
+                  )}
+
+                  {activeTab === 'table' && (
+                    <DataTable
+                      caption="All Transactions"
+                      data={[...pendingTransactions, ...syncedTransactions]}
+                      columns={txColumns}
+                      getRowId={(r) => r.id}
+                      bulkActions={[
+                        {
+                          label: 'Delete selected',
+                          icon: '🗑',
+                          action: (rows) => rows.forEach((r) => deleteTransaction(r.id)),
+                        },
+                      ]}
+                      exportFormats={['csv', 'json']}
+                      renderExpanded={(r) => (
+                        <pre style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
+                          {JSON.stringify(r.params, null, 2)}
+                        </pre>
+                      )}
+                    />
+                  )}
+
+                  {activeTab === 'search' && (
+                    <SearchPage
+                      transactions={[...pendingTransactions, ...syncedTransactions]}
+                      balances={balances}
+                      escrows={escrows}
+                    />
+                  )}
+
+                  {activeTab === 'dashboard' && (
+                    <>
+                      <h2 className="mb-md">Real-Time Dashboard</h2>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', marginBottom: '16px' }}>
+                        <Dashboard />
+                        <LiveDataFeed onDataUpdate={(data) => setChartData([...chartData, data])} />
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === 'settings' && (
+                    <>
+                      <h2 className="mb-md">Settings</h2>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <NotificationPreferences userId="user-1" />
+                        <AlertRules />
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === 'help' && (
+                    <>
+                      <h2 className="mb-md">Help &amp; Onboarding</h2>
+                      <HelpPanel />
+                    </>
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <div>
+                  <SyncStatus />
+                  <div className="card mt-lg">
+                    <div className="card-header">
+                      <span className="card-title">Storage</span>
+                    </div>
+                    <div className="flex flex-col gap-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted">Cached Items</span>
+                        <span>{balances.length + escrows.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted">Transactions</span>
+                        <span>{pendingTransactions.length + syncedTransactions.length}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
               {activeTab === 'search' && (
                 <SearchPage
                   transactions={[...pendingTransactions, ...syncedTransactions]}
