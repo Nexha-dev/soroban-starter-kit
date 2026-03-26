@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { CachedTransaction, Balance, EscrowData } from '../services/storage/types';
 import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { FacetedSearch } from './FacetedSearch';
 import { SavedSearches } from './SavedSearches';
+import { SearchAnalyticsDashboard } from './SearchAnalyticsDashboard';
 import { searchEngine, searchManager } from '../services/search';
 import { SearchQuery, FilterCriteria, SavedSearch, Facet } from '../services/search/types';
 
@@ -17,75 +18,57 @@ interface SearchPageProps {
 
 export function SearchPage({ transactions, balances, escrows }: SearchPageProps): JSX.Element {
   const [query, setQuery] = useState<SearchQuery>({ filters: {} });
-  const [results, setResults] = useState<SearchableItem[]>([]);
+  const [scored, setScored] = useState<{ item: SearchableItem; score: number }[]>([]);
   const [facets, setFacets] = useState<Facet[]>([]);
   const [selectedFacets, setSelectedFacets] = useState<Record<string, string[]>>({});
   const [executionTime, setExecutionTime] = useState(0);
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'relevance'>('date');
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const allItems: SearchableItem[] = [...transactions, ...balances, ...escrows];
 
-  useEffect(() => {
-    performSearch();
-  }, [query, selectedFacets, sortBy]);
+  const performSearch = useCallback((q: SearchQuery, facetOverride?: Record<string, string[]>) => {
+    const facetFilters: FilterCriteria = {};
+    Object.entries(facetOverride ?? selectedFacets).forEach(([k, v]) => {
+      if (v.length) (facetFilters as Record<string, unknown>)[k] = v;
+    });
 
-  const performSearch = async () => {
     const searchQuery: SearchQuery = {
-      text: query.text,
-      filters: { ...query.filters, ...buildFiltersFromFacets() },
+      text: q.text,
+      filters: { ...q.filters, ...facetFilters },
       sortBy,
       sortOrder: 'desc',
     };
 
     const result = searchEngine.search(allItems, searchQuery);
-    setResults(result.items);
+    setScored(result.scored);
     setExecutionTime(result.executionTime);
+    setFacets(searchEngine.getFacets(allItems, searchQuery.filters));
 
-    // Update facets
-    const newFacets = searchEngine.getFacets(allItems, searchQuery.filters);
-    setFacets(newFacets);
+    // Fire-and-forget analytics
+    searchManager.recordAnalytics(q.text ?? '', searchQuery.filters as Record<string, unknown>, result.total, result.executionTime);
+  }, [allItems, selectedFacets, sortBy]);
 
-    // Record analytics
-    await searchManager.recordAnalytics(
-      query.text || '',
-      searchQuery.filters,
-      result.items.length,
-      result.executionTime
-    );
-  };
+  // Debounced search on query/facet/sort changes
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => performSearch(query), 200);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, selectedFacets, sortBy]);
 
-  const buildFiltersFromFacets = (): FilterCriteria => {
-    const filters: FilterCriteria = {};
-    Object.entries(selectedFacets).forEach(([facetName, values]) => {
-      if (values.length > 0) {
-        (filters as any)[facetName] = values;
-      }
-    });
-    return filters;
-  };
-
-  const handleSearch = (text: string) => {
-    setQuery({ ...query, text });
-  };
-
-  const handleFilterChange = (filters: FilterCriteria) => {
-    setQuery({ ...query, filters });
-  };
+  const handleSearch = (text: string) => setQuery(q => ({ ...q, text }));
+  const handleFilterChange = (filters: FilterCriteria) => setQuery(q => ({ ...q, filters }));
 
   const handleFacetSelect = (facetName: string, value: string) => {
     const updated = { ...selectedFacets };
-    if (!updated[facetName]) {
-      updated[facetName] = [];
-    }
-    if (updated[facetName].includes(value)) {
-      updated[facetName] = updated[facetName].filter(v => v !== value);
-    } else {
-      updated[facetName].push(value);
-    }
+    updated[facetName] = updated[facetName]?.includes(value)
+      ? updated[facetName].filter(v => v !== value)
+      : [...(updated[facetName] ?? []), value];
     setSelectedFacets(updated);
   };
 
-  const handleSaveSearch = async (name: string, currentQuery: SearchQuery) => {
+  const handleSaveSearch = async (name: string) => {
     await searchManager.saveSearch(name, query);
   };
 
@@ -94,28 +77,30 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
     setSelectedFacets({});
   };
 
-  const renderItem = (item: SearchableItem) => {
+  const renderItem = (item: SearchableItem, score: number) => {
+    const scoreTag = score > 0 && (
+      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 10, background: '#ede9fe', color: '#6366f1', fontWeight: 600 }}>
+        ★ {score}
+      </span>
+    );
+
     if ('type' in item && 'method' in item) {
       const tx = item as CachedTransaction;
       return (
-        <div key={tx.id} className="card" style={{ marginBottom: '8px', padding: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>{tx.type}</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-                {tx.method} • {new Date(tx.createdAt).toLocaleString()}
+        <div key={tx.id} className="card" style={{ marginBottom: 8, padding: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                {tx.type} {scoreTag}
               </div>
-              <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                {JSON.stringify(tx.params).substring(0, 100)}...
+              <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                {tx.method} · {new Date(tx.createdAt).toLocaleString()}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {tx.contractId}
               </div>
             </div>
-            <span style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              backgroundColor: tx.status === 'synced' ? '#d4edda' : '#fff3cd',
-              color: tx.status === 'synced' ? '#155724' : '#856404',
-            }}>
+            <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: tx.status === 'synced' ? '#d4edda' : '#fff3cd', color: tx.status === 'synced' ? '#155724' : '#856404', whiteSpace: 'nowrap' }}>
               {tx.status}
             </span>
           </div>
@@ -125,19 +110,17 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
     if ('tokenSymbol' in item) {
       const bal = item as Balance;
       return (
-        <div key={bal.id} className="card" style={{ marginBottom: '8px', padding: '12px' }}>
+        <div key={bal.id} className="card" style={{ marginBottom: 8, padding: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>{bal.tokenSymbol}</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-                {bal.address.substring(0, 16)}...
+              <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                {bal.tokenSymbol} {scoreTag}
               </div>
+              <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{bal.address.slice(0, 20)}…</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>{bal.amount}</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-                {new Date(bal.lastUpdated).toLocaleString()}
-              </div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>{bal.amount}</div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{new Date(bal.lastUpdated).toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -146,24 +129,18 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
     if ('buyer' in item) {
       const escrow = item as EscrowData;
       return (
-        <div key={escrow.id} className="card" style={{ marginBottom: '8px', padding: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+        <div key={escrow.id} className="card" style={{ marginBottom: 8, padding: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>Escrow</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-                {escrow.buyer.substring(0, 16)}... → {escrow.seller.substring(0, 16)}...
+              <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                Escrow {scoreTag}
               </div>
-              <div style={{ fontSize: '12px', marginTop: '4px' }}>{escrow.amount}</div>
+              <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                {escrow.buyer.slice(0, 12)}… → {escrow.seller.slice(0, 12)}…
+              </div>
+              <div style={{ fontSize: 12, marginTop: 2 }}>{escrow.amount}</div>
             </div>
-            <span style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              backgroundColor: '#d4edda',
-              color: '#155724',
-            }}>
-              {escrow.status}
-            </span>
+            <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, background: '#d4edda', color: '#155724' }}>{escrow.status}</span>
           </div>
         </div>
       );
@@ -172,57 +149,49 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '16px', padding: '16px' }}>
-      {/* Sidebar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <FilterPanel onFilterChange={handleFilterChange} />
-        <FacetedSearch facets={facets} onFacetSelect={handleFacetSelect} selectedFacets={selectedFacets} />
-        <SavedSearches onLoadSearch={handleLoadSearch} onSaveSearch={handleSaveSearch} />
+    <div>
+      {/* Search bar + analytics toggle */}
+      <div style={{ marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <SearchBar onSearch={handleSearch} items={allItems} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn btn-secondary" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => setShowAnalytics(v => !v)}>
+            {showAnalytics ? '▲ Hide Analytics' : '📊 Search Analytics'}
+          </button>
+        </div>
+        {showAnalytics && <SearchAnalyticsDashboard />}
       </div>
 
-      {/* Main Content */}
-      <div>
-        <div style={{ marginBottom: '16px' }}>
-          <SearchBar onSearch={handleSearch} />
-        </div>
-
-        {/* Results Header */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
-          padding: '8px 0',
-          borderBottom: '1px solid var(--color-border)',
-        }}>
-          <div style={{ fontSize: '14px', color: 'var(--color-muted)' }}>
-            {results.length} results found in {executionTime.toFixed(2)}ms
-          </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            style={{
-              padding: '6px 8px',
-              fontSize: '12px',
-              borderRadius: '4px',
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-bg)',
-            }}
-          >
-            <option value="date">Sort by Date</option>
-            <option value="amount">Sort by Amount</option>
-            <option value="relevance">Sort by Relevance</option>
-          </select>
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16 }}>
+        {/* Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <FilterPanel onFilterChange={handleFilterChange} />
+          <FacetedSearch facets={facets} onFacetSelect={handleFacetSelect} selectedFacets={selectedFacets} />
+          <SavedSearches onLoadSearch={handleLoadSearch} onSaveSearch={handleSaveSearch} />
         </div>
 
         {/* Results */}
         <div>
-          {results.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '32px' }}>
-              <p style={{ color: 'var(--color-muted)' }}>No results found. Try adjusting your search or filters.</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid var(--color-border)' }}>
+            <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
+              {scored.length} results · {executionTime.toFixed(2)}ms
+            </span>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as typeof sortBy)}
+              style={{ padding: '5px 8px', fontSize: 12, borderRadius: 4, border: '1px solid var(--color-border)' }}
+            >
+              <option value="date">Sort: Date</option>
+              <option value="amount">Sort: Amount</option>
+              <option value="relevance">Sort: Relevance</option>
+            </select>
+          </div>
+
+          {scored.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: 32 }}>
+              <p style={{ color: 'var(--color-text-secondary)' }}>No results. Try adjusting your search or filters.</p>
             </div>
           ) : (
-            results.map(item => renderItem(item))
+            scored.map(({ item, score }) => renderItem(item, score))
           )}
         </div>
       </div>

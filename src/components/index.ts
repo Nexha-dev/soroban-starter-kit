@@ -29,6 +29,7 @@ export { PortfolioDashboard } from './PortfolioDashboard';
 export { SecurityDashboard } from './SecurityDashboard';
 export { TransactionHistory } from './TransactionHistory';
 export { ContractInteraction } from './ContractInteraction';
+export { SearchAnalyticsDashboard } from './SearchAnalyticsDashboard';
 export { WalletButton } from './WalletButton';
 export { HelpPanel } from './HelpPanel';
 export { LogDashboard } from './LogDashboard';

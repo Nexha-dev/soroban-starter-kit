@@ -9,208 +9,184 @@ import {
 
 type SearchableItem = CachedTransaction | Balance | EscrowData;
 
+// ── Inverted index for O(1) token lookups ─────────────────────────────────────
+
+interface IndexedItem<T> {
+  item: T;
+  tokens: Set<string>;
+  text: string;
+}
+
 /**
- * Full-text search and filtering engine
+ * Full-text search and filtering engine with inverted index
  */
 class SearchEngine {
-  private tokenizeText(text: string): string[] {
-    return text.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-  }
+  // Cache the last-built index to avoid rebuilding on every keystroke
+  private indexCache: Map<string, IndexedItem<SearchableItem>[]> = new Map();
+  private indexKey = '';
 
-  private calculateRelevance(item: SearchableItem, tokens: string[]): number {
-    const itemText = this.itemToText(item).toLowerCase();
-    let score = 0;
-
-    tokens.forEach(token => {
-      const regex = new RegExp(`\\b${token}`, 'g');
-      const matches = itemText.match(regex);
-      score += (matches?.length || 0) * 10;
-    });
-
-    return score;
+  private tokenize(text: string): string[] {
+    return text.toLowerCase().split(/[\s_\-./]+/).filter(t => t.length > 1);
   }
 
   private itemToText(item: SearchableItem): string {
     if ('type' in item && 'method' in item) {
-      // CachedTransaction
       const tx = item as CachedTransaction;
-      return `${tx.type} ${tx.method} ${tx.contractId} ${JSON.stringify(tx.params)}`;
+      return `${tx.id} ${tx.type} ${tx.method} ${tx.contractId} ${tx.status} ${JSON.stringify(tx.params)}`;
     }
     if ('tokenSymbol' in item) {
-      // Balance
       const bal = item as Balance;
-      return `${bal.tokenSymbol} ${bal.address} ${bal.amount}`;
+      return `${bal.id} ${bal.tokenSymbol} ${bal.address} ${bal.contractId} ${bal.amount}`;
     }
     if ('buyer' in item) {
-      // EscrowData
       const escrow = item as EscrowData;
-      return `${escrow.buyer} ${escrow.seller} ${escrow.status} ${escrow.amount}`;
+      return `${escrow.id} ${escrow.buyer} ${escrow.seller} ${escrow.contractId} ${escrow.status} ${escrow.amount}`;
     }
     return '';
   }
 
+  /** Build or return cached inverted index */
+  private buildIndex<T extends SearchableItem>(items: T[]): IndexedItem<T>[] {
+    const key = items.map(i => ('id' in i ? i.id : '')).join(',');
+    if (key === this.indexKey && this.indexCache.has(key)) {
+      return this.indexCache.get(key) as IndexedItem<T>[];
+    }
+    const indexed = items.map(item => {
+      const text = this.itemToText(item);
+      return { item, tokens: new Set(this.tokenize(text)), text };
+    });
+    this.indexCache.clear();
+    this.indexCache.set(key, indexed as IndexedItem<SearchableItem>[]);
+    this.indexKey = key;
+    return indexed;
+  }
+
+  private scoreItem(indexed: IndexedItem<SearchableItem>, queryTokens: string[]): number {
+    let score = 0;
+    for (const qt of queryTokens) {
+      for (const token of indexed.tokens) {
+        if (token === qt) score += 10;          // exact match
+        else if (token.startsWith(qt)) score += 5; // prefix match
+      }
+      // Boost for matches in important fields (id, type, symbol)
+      const firstChunk = indexed.text.split(' ').slice(0, 3).join(' ').toLowerCase();
+      if (firstChunk.includes(qt)) score += 3;
+    }
+    return score;
+  }
+
   private matchesFilters(item: SearchableItem, filters: FilterCriteria): boolean {
-    // Type filter
-    if (filters.type && filters.type.length > 0) {
+    if (filters.type?.length) {
       const itemType = ('type' in item) ? (item as CachedTransaction).type : 'unknown';
       if (!filters.type.includes(itemType)) return false;
     }
-
-    // Status filter
-    if (filters.status && filters.status.length > 0) {
+    if (filters.status?.length) {
       const itemStatus = ('status' in item) ? (item as CachedTransaction | EscrowData).status : 'unknown';
       if (!filters.status.includes(itemStatus)) return false;
     }
-
-    // Date range filter
     if (filters.dateRange) {
       const itemDate = ('createdAt' in item) ? (item as CachedTransaction | EscrowData).createdAt : 0;
       if (itemDate < filters.dateRange.start || itemDate > filters.dateRange.end) return false;
     }
-
-    // Amount range filter
     if (filters.amountRange) {
-      const itemAmount = parseFloat(
-        ('amount' in item) ? (item as Balance | EscrowData).amount : '0'
-      );
-      if (itemAmount < filters.amountRange.min || itemAmount > filters.amountRange.max) {
-        return false;
-      }
+      const itemAmount = parseFloat(('amount' in item) ? (item as Balance | EscrowData).amount : '0');
+      if (itemAmount < filters.amountRange.min || itemAmount > filters.amountRange.max) return false;
     }
-
-    // Contract ID filter
-    if (filters.contractId && filters.contractId.length > 0) {
+    if (filters.contractId?.length) {
       const itemContractId = ('contractId' in item) ? (item as CachedTransaction | Balance | EscrowData).contractId : '';
       if (!filters.contractId.includes(itemContractId)) return false;
     }
-
     return true;
   }
 
-  search<T extends SearchableItem>(
-    items: T[],
-    query: SearchQuery
-  ): SearchResult<T> {
+  search<T extends SearchableItem>(items: T[], query: SearchQuery): SearchResult<T> & { scored: { item: T; score: number }[] } {
     const startTime = performance.now();
+    const indexed = this.buildIndex(items);
 
-    let results = items.filter(item => this.matchesFilters(item, query.filters));
+    // Filter first (cheap)
+    const filtered = indexed.filter(ix => this.matchesFilters(ix.item, query.filters));
 
-    // Full-text search
-    if (query.text) {
-      const tokens = this.tokenizeText(query.text);
-      results = results
-        .map(item => ({
-          item,
-          relevance: this.calculateRelevance(item, tokens),
-        }))
-        .filter(r => r.relevance > 0)
-        .sort((a, b) => b.relevance - a.relevance)
-        .map(r => r.item);
-    }
+    let scored: { item: T; score: number }[];
 
-    // Sorting
-    if (query.sortBy) {
-      results = this.sortResults(results, query.sortBy, query.sortOrder || 'asc');
+    if (query.text?.trim()) {
+      const queryTokens = this.tokenize(query.text);
+      scored = filtered
+        .map(ix => ({ item: ix.item as T, score: this.scoreItem(ix, queryTokens) }))
+        .filter(r => r.score > 0)
+        .sort((a, b) => b.score - a.score);
+    } else {
+      scored = filtered.map(ix => ({ item: ix.item as T, score: 0 }));
+      // Default sort
+      if (query.sortBy === 'date' || !query.sortBy) {
+        scored.sort((a, b) => {
+          const aDate = ('createdAt' in a.item) ? (a.item as CachedTransaction).createdAt : 0;
+          const bDate = ('createdAt' in b.item) ? (b.item as CachedTransaction).createdAt : 0;
+          return query.sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+        });
+      } else if (query.sortBy === 'amount') {
+        scored.sort((a, b) => {
+          const aAmt = parseFloat(('amount' in a.item) ? (a.item as Balance).amount : '0');
+          const bAmt = parseFloat(('amount' in b.item) ? (b.item as Balance).amount : '0');
+          return query.sortOrder === 'asc' ? aAmt - bAmt : bAmt - aAmt;
+        });
+      }
     }
 
     const executionTime = performance.now() - startTime;
-
     return {
-      items: results,
-      total: results.length,
+      items: scored.map(r => r.item),
+      scored,
+      total: scored.length,
       query,
       executionTime,
     };
   }
 
-  private sortResults<T extends SearchableItem>(
-    items: T[],
-    sortBy: string,
-    order: 'asc' | 'desc'
-  ): T[] {
-    const sorted = [...items].sort((a, b) => {
-      let aVal: number | string = 0;
-      let bVal: number | string = 0;
+  /** Extract autocomplete candidates directly from data */
+  getDataSuggestions(items: SearchableItem[], prefix: string, limit = 8): string[] {
+    if (!prefix || prefix.length < 1) return [];
+    const p = prefix.toLowerCase();
+    const seen = new Set<string>();
+    const results: string[] = [];
 
-      if (sortBy === 'date') {
-        aVal = ('createdAt' in a) ? (a as CachedTransaction | EscrowData).createdAt : 0;
-        bVal = ('createdAt' in b) ? (b as CachedTransaction | EscrowData).createdAt : 0;
-      } else if (sortBy === 'amount') {
-        aVal = parseFloat(('amount' in a) ? (a as Balance | EscrowData).amount : '0');
-        bVal = parseFloat(('amount' in b) ? (b as Balance | EscrowData).amount : '0');
+    for (const item of items) {
+      if (results.length >= limit) break;
+      const candidates: string[] = [];
+      if ('type' in item && 'method' in item) {
+        const tx = item as CachedTransaction;
+        candidates.push(tx.type, tx.method, tx.contractId.slice(0, 12));
+      } else if ('tokenSymbol' in item) {
+        const bal = item as Balance;
+        candidates.push(bal.tokenSymbol, bal.address.slice(0, 12));
+      } else if ('buyer' in item) {
+        const escrow = item as EscrowData;
+        candidates.push(escrow.status, escrow.buyer.slice(0, 12));
       }
-
-      return order === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
-    });
-
-    return sorted;
+      for (const c of candidates) {
+        if (c.toLowerCase().startsWith(p) && !seen.has(c)) {
+          seen.add(c);
+          results.push(c);
+        }
+      }
+    }
+    return results;
   }
 
-  getFacets<T extends SearchableItem>(
-    items: T[],
-    filters: FilterCriteria
-  ): Facet[] {
+  getFacets<T extends SearchableItem>(items: T[], filters: FilterCriteria): Facet[] {
     const facets: Facet[] = [];
-
-    // Type facet
     const typeMap = new Map<string, number>();
-    items.forEach(item => {
-      if ('type' in item) {
-        const type = (item as CachedTransaction).type;
-        typeMap.set(type, (typeMap.get(type) || 0) + 1);
-      }
-    });
-
-    if (typeMap.size > 0) {
-      facets.push({
-        name: 'type',
-        options: Array.from(typeMap.entries()).map(([value, count]) => ({
-          value,
-          label: value.charAt(0).toUpperCase() + value.slice(1),
-          count,
-        })),
-      });
-    }
-
-    // Status facet
     const statusMap = new Map<string, number>();
-    items.forEach(item => {
-      if ('status' in item) {
-        const status = (item as CachedTransaction | EscrowData).status;
-        statusMap.set(status, (statusMap.get(status) || 0) + 1);
-      }
-    });
-
-    if (statusMap.size > 0) {
-      facets.push({
-        name: 'status',
-        options: Array.from(statusMap.entries()).map(([value, count]) => ({
-          value,
-          label: value.charAt(0).toUpperCase() + value.slice(1),
-          count,
-        })),
-      });
-    }
-
-    // Contract ID facet
     const contractMap = new Map<string, number>();
+
     items.forEach(item => {
-      if ('contractId' in item) {
-        const contractId = (item as CachedTransaction | Balance | EscrowData).contractId;
-        contractMap.set(contractId, (contractMap.get(contractId) || 0) + 1);
-      }
+      if ('type' in item) typeMap.set((item as CachedTransaction).type, (typeMap.get((item as CachedTransaction).type) || 0) + 1);
+      if ('status' in item) statusMap.set((item as any).status, (statusMap.get((item as any).status) || 0) + 1);
+      if ('contractId' in item) contractMap.set((item as any).contractId, (contractMap.get((item as any).contractId) || 0) + 1);
     });
 
-    if (contractMap.size > 0) {
-      facets.push({
-        name: 'contractId',
-        options: Array.from(contractMap.entries()).map(([value, count]) => ({
-          value,
-          label: value.substring(0, 8) + '...',
-          count,
-        })),
-      });
-    }
+    if (typeMap.size > 0) facets.push({ name: 'type', options: [...typeMap.entries()].map(([value, count]) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1), count })) });
+    if (statusMap.size > 0) facets.push({ name: 'status', options: [...statusMap.entries()].map(([value, count]) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1), count })) });
+    if (contractMap.size > 0) facets.push({ name: 'contractId', options: [...contractMap.entries()].map(([value, count]) => ({ value, label: value.substring(0, 8) + '...', count })) });
 
     return facets;
   }
