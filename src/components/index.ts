@@ -29,3 +29,4 @@ export { TransactionHistory } from './TransactionHistory';
 export { ContractInteraction } from './ContractInteraction';
 export { PerformanceDashboard } from './PerformanceDashboard';
 export { AccessibilityDashboard } from './AccessibilityDashboard';
+export { ComponentDocs } from './ComponentDocs';
