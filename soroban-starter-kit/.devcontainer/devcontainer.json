@@ -1,0 +1,37 @@
+{
+  "name": "Soroban Starter Kit",
+  "dockerComposeFile": "../docker/docker-compose.yml",
+  "service": "frontend",
+  "workspaceFolder": "/app",
+
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": { "version": "1.78" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "postCreateCommand": "bash scripts/setup.sh",
+
+  "forwardPorts": [3000, 8000, 8001],
+  "portsAttributes": {
+    "3000": { "label": "Frontend Dev Server" },
+    "8000": { "label": "Stellar RPC" },
+    "8001": { "label": "Horizon API" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" }
+      }
+    }
+  }
+}

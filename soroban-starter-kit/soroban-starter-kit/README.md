@@ -1,9 +1,5 @@
 # Soroban Contract Templates
 
-[![Built for Soroban](https://img.shields.io/badge/Built%20for-Soroban-blue)](https://soroban.stellar.org/)
-[![Stellar Wave Ready](https://img.shields.io/badge/Stellar%20Wave-Ready-green)](https://www.drips.network/wave)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-
 A curated, well-documented collection of production-ready, modular Soroban smart contract templates and examples. These help new and experienced developers quickly bootstrap common use cases on Soroban (Stellar's smart contract platform), lowering the barrier to building dApps, DeFi, NFTs, payments, and more.
 
 This repository aims to fill gaps beyond the official [stellar/soroban-examples](https://github.com/stellar/soroban-examples) by including more real-world patterns, best practices, comprehensive tests, deployment scripts, and frontend integration stubs.
@@ -145,39 +141,3 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ---
 
 **Ready to build on Soroban?** Start with any template and customize it for your use case! 🚀
-
-## 🔔 Notification System
-
-This repository now includes a comprehensive notification system for Soroban DApps, featuring:
-
-### Features
-- **Real-time Notifications**: WebSocket-based real-time delivery
-- **Push Notifications**: VAPID-compliant push notification support
-- **Smart Categorization**: Automatic categorization (transaction, escrow, system, security, marketing, general)
-- **Priority Management**: Intelligent prioritization with critical, high, medium, low levels
-- **User Preferences**: Granular control over notification channels and settings
-- **History Management**: Advanced filtering, search, and bulk operations
-- **Analytics**: Comprehensive delivery tracking and engagement metrics
-
-### Components
-- `NotificationHistory.tsx` - Advanced notification history UI
-- `NotificationPreferences.tsx` - User preference management
-- `RealtimeNotificationService` - WebSocket real-time delivery
-- `PushNotificationService` - Push notification management
-- `NotificationCategorizer` - Smart categorization engine
-- `NotificationDeliveryService` - Multi-channel delivery
-
-### Quick Usage
-```typescript
-import { notificationManager } from './services/notifications';
-
-// Send a notification
-await notificationManager.sendNotification({
-  userId: 'user123',
-  title: 'Transaction Complete',
-  message: 'Your transaction has been confirmed',
-  category: 'transaction',
-  priority: 'high',
-  channels: ['in-app', 'push']
-});
-```

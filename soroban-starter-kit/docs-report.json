@@ -1,0 +1,1101 @@
+{
+  "timestamp": "2026-03-26T11:51:26.639Z",
+  "typescript": {
+    "total": 292,
+    "documented": 75,
+    "coverage": "26%",
+    "violations": [
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 1,
+        "symbol": "ComponentType"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 3,
+        "symbol": "LayoutItem"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 12,
+        "symbol": "Layout"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 14,
+        "symbol": "GRID_COLS"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 16,
+        "symbol": "COMPONENT_LABELS"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 24,
+        "symbol": "DEFAULT_LAYOUT"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/types.ts",
+        "line": 32,
+        "symbol": "LAYOUT_TEMPLATES"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/useLayoutBuilder.ts",
+        "line": 32,
+        "symbol": "useLayoutBuilder"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/accessibilityAuditor.ts",
+        "line": 14,
+        "symbol": "A11yAuditReport"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/accessibilityAuditor.ts",
+        "line": 254,
+        "symbol": "accessibilityAuditor"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/accessibilityManager.ts",
+        "line": 15,
+        "symbol": "A11yMetrics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/accessibilityManager.ts",
+        "line": 159,
+        "symbol": "accessibilityManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/keyboardNavigationManager.ts",
+        "line": 166,
+        "symbol": "keyboardNavigationManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/voiceCommandManager.ts",
+        "line": 12,
+        "symbol": "VoiceConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/a11y/voiceCommandManager.ts",
+        "line": 142,
+        "symbol": "voiceCommandManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/conflictResolver.ts",
+        "line": 9,
+        "symbol": "ConflictResolutionStrategy"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/conflictResolver.ts",
+        "line": 11,
+        "symbol": "ConflictResolution"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/conflictResolver.ts",
+        "line": 211,
+        "symbol": "conflictResolver"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/contractService.ts",
+        "line": 96,
+        "symbol": "validateParam"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/contractService.ts",
+        "line": 122,
+        "symbol": "simulateTransaction"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/contractService.ts",
+        "line": 147,
+        "symbol": "getBuiltInABIs"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 3,
+        "symbol": "ParamKind"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 5,
+        "symbol": "ParamDef"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 14,
+        "symbol": "FunctionDef"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 25,
+        "symbol": "SimulationResult"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 33,
+        "symbol": "BatchItem"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/contractInteraction/types.ts",
+        "line": 41,
+        "symbol": "ContractABI"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/devTools.ts",
+        "line": 8,
+        "symbol": "DevToolsConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/devTools.ts",
+        "line": 160,
+        "symbol": "devTools"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorAnalytics.ts",
+        "line": 14,
+        "symbol": "CrashReport"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorAnalytics.ts",
+        "line": 94,
+        "symbol": "errorAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorHandler.ts",
+        "line": 7,
+        "symbol": "ErrorSeverity"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorHandler.ts",
+        "line": 9,
+        "symbol": "ErrorInfo"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorHandler.ts",
+        "line": 21,
+        "symbol": "ErrorReport"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorHandler.ts",
+        "line": 199,
+        "symbol": "errorHandler"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorMessages.ts",
+        "line": 58,
+        "symbol": "getErrorMessage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/error/errorMessages.ts",
+        "line": 62,
+        "symbol": "getUserFriendlyMessage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/navigation/navigationManager.ts",
+        "line": 76,
+        "symbol": "navigationManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/navigation/types.ts",
+        "line": 1,
+        "symbol": "NavItem"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/navigation/types.ts",
+        "line": 11,
+        "symbol": "NavConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/navigation/types.ts",
+        "line": 16,
+        "symbol": "NavAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/navigation/types.ts",
+        "line": 23,
+        "symbol": "BreadcrumbItem"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/notificationEngine.ts",
+        "line": 3,
+        "symbol": "NotificationEngine"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/notificationManager.ts",
+        "line": 158,
+        "symbol": "notificationManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 1,
+        "symbol": "NotificationChannel"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 2,
+        "symbol": "NotificationPriority"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 3,
+        "symbol": "AlertRuleOperator"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 5,
+        "symbol": "Notification"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 17,
+        "symbol": "UserPreferences"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 26,
+        "symbol": "AlertRule"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 43,
+        "symbol": "NotificationAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/notifications/types.ts",
+        "line": 52,
+        "symbol": "NotificationSchedule"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/analyzer.ts",
+        "line": 15,
+        "symbol": "PerformanceAnalysis"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/analyzer.ts",
+        "line": 154,
+        "symbol": "performanceAnalyzer"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/budgetManager.ts",
+        "line": 14,
+        "symbol": "BudgetAlert"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/budgetManager.ts",
+        "line": 146,
+        "symbol": "performanceBudgetManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/comparator.ts",
+        "line": 93,
+        "symbol": "performanceComparator"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/metricsCollector.ts",
+        "line": 13,
+        "symbol": "CoreWebVitals"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/metricsCollector.ts",
+        "line": 21,
+        "symbol": "PerformanceSnapshot"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performance/metricsCollector.ts",
+        "line": 187,
+        "symbol": "performanceMetricsCollector"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performanceMonitor.ts",
+        "line": 13,
+        "symbol": "PerformanceSummary"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/performanceMonitor.ts",
+        "line": 135,
+        "symbol": "performanceMonitor"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/persistenceManager.ts",
+        "line": 117,
+        "symbol": "persistenceManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 15,
+        "symbol": "initInstallPrompt"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 25,
+        "symbol": "promptInstall"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 34,
+        "symbol": "isInstalled"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 50,
+        "symbol": "requestPushPermission"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 57,
+        "symbol": "subscribeToPush"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 76,
+        "symbol": "unsubscribeFromPush"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 86,
+        "symbol": "showLocalNotification"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 106,
+        "symbol": "trackEvent"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 120,
+        "symbol": "getSessionEvents"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/pwa.ts",
+        "line": 128,
+        "symbol": "trackWebVitals"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/searchEngine.ts",
+        "line": 219,
+        "symbol": "searchEngine"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/searchManager.ts",
+        "line": 157,
+        "symbol": "searchManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 12,
+        "symbol": "FilterCriteria"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 21,
+        "symbol": "SearchResult"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 28,
+        "symbol": "SavedSearch"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 37,
+        "symbol": "SearchAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 47,
+        "symbol": "SearchSuggestion"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 54,
+        "symbol": "FacetOption"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/search/types.ts",
+        "line": 60,
+        "symbol": "Facet"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/securityService.ts",
+        "line": 422,
+        "symbol": "securityService"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 1,
+        "symbol": "AuthMethod"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 2,
+        "symbol": "AlertSeverity"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 4,
+        "symbol": "SecuritySession"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 13,
+        "symbol": "AuditLogEntry"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 22,
+        "symbol": "SecurityAlert"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 30,
+        "symbol": "SecurityConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/security/types.ts",
+        "line": 37,
+        "symbol": "SecurityState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateManager.ts",
+        "line": 15,
+        "symbol": "NormalizedState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateManager.ts",
+        "line": 242,
+        "symbol": "stateManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateSynchronizer.ts",
+        "line": 8,
+        "symbol": "SyncEvent"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateSynchronizer.ts",
+        "line": 127,
+        "symbol": "stateSynchronizer"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateValidator.ts",
+        "line": 8,
+        "symbol": "ValidationResult"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateValidator.ts",
+        "line": 15,
+        "symbol": "ValidationError"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/stateValidator.ts",
+        "line": 247,
+        "symbol": "stateValidator"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/index.ts",
+        "line": 335,
+        "symbol": "storageService"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 6,
+        "symbol": "Balance"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 20,
+        "symbol": "BalanceDisplayPreferences"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 29,
+        "symbol": "EscrowStatus"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 31,
+        "symbol": "EscrowData"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 46,
+        "symbol": "TransactionStatus"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 47,
+        "symbol": "TransactionType"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 49,
+        "symbol": "CachedTransaction"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 68,
+        "symbol": "ConflictData"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 76,
+        "symbol": "UserPreferences"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 87,
+        "symbol": "ConnectionStatus"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 90,
+        "symbol": "SyncStatus"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 98,
+        "symbol": "ApiResponse"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/storage/types.ts",
+        "line": 105,
+        "symbol": "NetworkInfo"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/sync.ts",
+        "line": 264,
+        "symbol": "syncService"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/transactionQueue.ts",
+        "line": 240,
+        "symbol": "transactionQueue"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/dataAggregator.ts",
+        "line": 3,
+        "symbol": "DataAggregator"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 1,
+        "symbol": "DataPoint"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 7,
+        "symbol": "ChartConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 16,
+        "symbol": "DashboardWidget"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 25,
+        "symbol": "DashboardLayout"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 32,
+        "symbol": "VisualizationAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/types.ts",
+        "line": 40,
+        "symbol": "WebSocketMessage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/visualizationManager.ts",
+        "line": 86,
+        "symbol": "visualizationManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/services/visualization/webSocketManager.ts",
+        "line": 77,
+        "symbol": "createWebSocketManager"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/types.ts",
+        "line": 3,
+        "symbol": "SortDir"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/types.ts",
+        "line": 5,
+        "symbol": "ColumnDef"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/types.ts",
+        "line": 21,
+        "symbol": "TableState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/types.ts",
+        "line": 32,
+        "symbol": "BulkAction"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/types.ts",
+        "line": 38,
+        "symbol": "ExportFormat"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/useTable.ts",
+        "line": 59,
+        "symbol": "useTable"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tests/mocks/handlers.ts",
+        "line": 3,
+        "symbol": "sorobanHandlers"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tests/mocks/server.ts",
+        "line": 4,
+        "symbol": "server"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/theme/tokens.ts",
+        "line": 1,
+        "symbol": "ThemeMode"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/theme/tokens.ts",
+        "line": 3,
+        "symbol": "ColorScheme"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/theme/tokens.ts",
+        "line": 5,
+        "symbol": "ThemeTokens"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/theme/tokens.ts",
+        "line": 35,
+        "symbol": "buildTokens"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/theme/tokens.ts",
+        "line": 78,
+        "symbol": "applyTokens"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 1,
+        "symbol": "StepTarget"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 5,
+        "symbol": "TutorialMedia"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 11,
+        "symbol": "TutorialStep"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 25,
+        "symbol": "Tutorial"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 34,
+        "symbol": "MAIN_TUTORIAL"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tutorial/steps.ts",
+        "line": 101,
+        "symbol": "ALL_TUTORIALS"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/rules.ts",
+        "line": 43,
+        "symbol": "required"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/rules.ts",
+        "line": 46,
+        "symbol": "minLength"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/rules.ts",
+        "line": 49,
+        "symbol": "maxLength"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/rules.ts",
+        "line": 52,
+        "symbol": "pattern"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/useFormValidation.ts",
+        "line": 6,
+        "symbol": "FieldState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/useFormValidation.ts",
+        "line": 13,
+        "symbol": "FormConfig"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/useFormValidation.ts",
+        "line": 20,
+        "symbol": "ValidationAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/useFormValidation.ts",
+        "line": 42,
+        "symbol": "resolveMessage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/validation/useFormValidation.ts",
+        "line": 52,
+        "symbol": "useFormValidation"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/templates.ts",
+        "line": 6,
+        "symbol": "deployContractTemplate"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/templates.ts",
+        "line": 49,
+        "symbol": "tokenCreationTemplate"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/templates.ts",
+        "line": 93,
+        "symbol": "escrowSetupTemplate"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/templates.ts",
+        "line": 136,
+        "symbol": "WORKFLOW_TEMPLATES"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 3,
+        "symbol": "StepStatus"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 5,
+        "symbol": "WorkflowStep"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 18,
+        "symbol": "WorkflowValues"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 20,
+        "symbol": "WorkflowState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 28,
+        "symbol": "WorkflowAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/types.ts",
+        "line": 36,
+        "symbol": "WorkflowTemplate"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/useWorkflow.ts",
+        "line": 15,
+        "symbol": "useWorkflow"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/DashboardBuilder.tsx",
+        "line": 22,
+        "symbol": "DashboardBuilder"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/builder/DashboardCell.tsx",
+        "line": 14,
+        "symbol": "DashboardCell"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/AlertRules.tsx",
+        "line": 9,
+        "symbol": "AlertRules"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/BalanceDisplay.tsx",
+        "line": 86,
+        "symbol": "BalanceList"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/Breadcrumb.tsx",
+        "line": 9,
+        "symbol": "Breadcrumb"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/Chart.tsx",
+        "line": 14,
+        "symbol": "Chart"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/ContextualNav.tsx",
+        "line": 11,
+        "symbol": "ContextualNav"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/ContractInteraction.tsx",
+        "line": 19,
+        "symbol": "ContractInteraction"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/Dashboard.tsx",
+        "line": 11,
+        "symbol": "Dashboard"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/FacetedSearch.tsx",
+        "line": 10,
+        "symbol": "FacetedSearch"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/FilterPanel.tsx",
+        "line": 10,
+        "symbol": "FilterPanel"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/LiveDataFeed.tsx",
+        "line": 10,
+        "symbol": "LiveDataFeed"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/NotificationCenter.tsx",
+        "line": 10,
+        "symbol": "NotificationCenter"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/NotificationPreferences.tsx",
+        "line": 10,
+        "symbol": "NotificationPreferences"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/PortfolioDashboard.tsx",
+        "line": 339,
+        "symbol": "PortfolioDashboard"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/ResponsiveNav.tsx",
+        "line": 11,
+        "symbol": "ResponsiveNav"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/SavedSearches.tsx",
+        "line": 10,
+        "symbol": "SavedSearches"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/SearchBar.tsx",
+        "line": 10,
+        "symbol": "SearchBar"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/SearchPage.tsx",
+        "line": 18,
+        "symbol": "SearchPage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/SecurityDashboard.tsx",
+        "line": 14,
+        "symbol": "SecurityDashboard"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/ThemeToggle.tsx",
+        "line": 13,
+        "symbol": "ThemeToggle"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/TokenTransferWizard.tsx",
+        "line": 354,
+        "symbol": "TokenTransferWizard"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/TransactionFormBuilder.tsx",
+        "line": 295,
+        "symbol": "TransactionFormBuilder"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/TransactionHistory.tsx",
+        "line": 90,
+        "symbol": "TransactionHistory"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/TransactionItem.tsx",
+        "line": 138,
+        "symbol": "TransactionList"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/components/TutorialOverlay.tsx",
+        "line": 13,
+        "symbol": "TutorialOverlay"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/A11yContext.tsx",
+        "line": 15,
+        "symbol": "A11yProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/A11yContext.tsx",
+        "line": 37,
+        "symbol": "useA11y"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/ConnectivityContext.tsx",
+        "line": 17,
+        "symbol": "ConnectivityProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/ConnectivityContext.tsx",
+        "line": 96,
+        "symbol": "useConnectivity"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/OptimizedStateContext.tsx",
+        "line": 33,
+        "symbol": "OptimizedStateProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/OptimizedStateContext.tsx",
+        "line": 193,
+        "symbol": "useOptimizedState"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/PWAContext.tsx",
+        "line": 25,
+        "symbol": "PWAProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/PWAContext.tsx",
+        "line": 76,
+        "symbol": "usePWA"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/SecurityContext.tsx",
+        "line": 22,
+        "symbol": "SecurityProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/SecurityContext.tsx",
+        "line": 49,
+        "symbol": "useSecurity"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/StorageContext.tsx",
+        "line": 25,
+        "symbol": "StorageProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/StorageContext.tsx",
+        "line": 118,
+        "symbol": "useStorage"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/ThemeContext.tsx",
+        "line": 34,
+        "symbol": "ThemeProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/ThemeContext.tsx",
+        "line": 71,
+        "symbol": "useTheme"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TransactionQueueContext.tsx",
+        "line": 32,
+        "symbol": "TransactionQueueProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TransactionQueueContext.tsx",
+        "line": 178,
+        "symbol": "useTransactionQueue"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TutorialContext.tsx",
+        "line": 13,
+        "symbol": "StepAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TutorialContext.tsx",
+        "line": 19,
+        "symbol": "TutorialAnalytics"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TutorialContext.tsx",
+        "line": 71,
+        "symbol": "TutorialProvider"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/context/TutorialContext.tsx",
+        "line": 198,
+        "symbol": "useTutorial"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/examples/StateOptimizationExamples.tsx",
+        "line": 59,
+        "symbol": "BalanceComponent"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/examples/StateOptimizationExamples.tsx",
+        "line": 75,
+        "symbol": "TransactionComponent"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/examples/StateOptimizationExamples.tsx",
+        "line": 130,
+        "symbol": "PerformanceMonitoringExample"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/examples/StateOptimizationExamples.tsx",
+        "line": 156,
+        "symbol": "CustomSelectorExample"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/table/DataTable.tsx",
+        "line": 25,
+        "symbol": "DataTable"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/tests/utils/renderWithProviders.tsx",
+        "line": 29,
+        "symbol": "renderWithProviders"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/StepForm.tsx",
+        "line": 16,
+        "symbol": "StepForm"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/StepIndicator.tsx",
+        "line": 27,
+        "symbol": "StepIndicator"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/Workflow.tsx",
+        "line": 13,
+        "symbol": "Workflow"
+      },
+      {
+        "file": "/home/henry-peters/Desktop/fidelis/soroban-starter-kit/src/workflow/WorkflowLauncher.tsx",
+        "line": 10,
+        "symbol": "WorkflowLauncher"
+      }
+    ]
+  },
+  "rust": {
+    "total": 18,
+    "documented": 18,
+    "coverage": "100%",
+    "violations": []
+  }
+}

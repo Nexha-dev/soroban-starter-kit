@@ -1,0 +1,24 @@
+{
+  "locale": "ar-SA",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "الأرصدة",
+    "nav.pending": "قيد الانتظار ({count})",
+    "nav.history": "السجل",
+    "nav.settings": "الإعدادات",
+    "common.loading": "جارٍ التحميل…",
+    "common.error": "حدث خطأ",
+    "common.save": "حفظ",
+    "common.cancel": "إلغاء",
+    "common.confirm": "تأكيد",
+    "common.close": "إغلاق",
+    "tx.count": {
+      "zero": "لا توجد معاملات",
+      "one": "معاملة واحدة",
+      "two": "معاملتان",
+      "few": "{{count}} معاملات",
+      "many": "{{count}} معاملة",
+      "other": "{{count}} معاملة"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "soroban-api-explorer",
+  "version": "1.0.0",
+  "description": "Interactive API documentation and testing interface for Soroban contracts",
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "start": "npx serve . -p 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
+  },
+  "keywords": ["soroban", "stellar", "smart-contracts", "api-explorer"],
+  "license": "Apache-2.0"
+}

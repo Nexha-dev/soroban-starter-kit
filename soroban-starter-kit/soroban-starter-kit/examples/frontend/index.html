@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soroban API Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Soroban Explorer</span>
+      </div>
+
+      <div class="network-selector">
+        <label>Network</label>
+        <select id="network-select">
+          <option value="testnet">Testnet</option>
+          <option value="mainnet">Mainnet</option>
+          <option value="futurenet">Futurenet</option>
+          <option value="custom">Custom RPC</option>
+        </select>
+        <input id="custom-rpc" type="text" placeholder="https://your-rpc-url" style="display:none" />
+      </div>
+
+      <div class="wallet-section">
+        <button id="connect-wallet-btn" class="btn btn-primary btn-sm">Connect Freighter</button>
+        <div id="wallet-info" style="display:none">
+          <span class="wallet-badge">●</span>
+          <span id="wallet-address" class="wallet-addr"></span>
+        </div>
+      </div>
+
+      <nav class="contract-nav">
+        <div class="nav-section">
+          <div class="nav-section-title" data-contract="token">
+            <span class="contract-icon">🪙</span> Token Contract
+            <span class="chevron">▾</span>
+          </div>
+          <ul id="token-methods" class="method-list">
+            <li class="method-item read" data-contract="token" data-method="balance">balance</li>
+            <li class="method-item read" data-contract="token" data-method="allowance">allowance</li>
+            <li class="method-item read" data-contract="token" data-method="name">name</li>
+            <li class="method-item read" data-contract="token" data-method="symbol">symbol</li>
+            <li class="method-item read" data-contract="token" data-method="decimals">decimals</li>
+            <li class="method-item read" data-contract="token" data-method="total_supply">total_supply</li>
+            <li class="method-item read" data-contract="token" data-method="admin">admin</li>
+            <li class="method-item write" data-contract="token" data-method="initialize">initialize</li>
+            <li class="method-item write" data-contract="token" data-method="mint">mint</li>
+            <li class="method-item write" data-contract="token" data-method="burn">burn</li>
+            <li class="method-item write" data-contract="token" data-method="transfer">transfer</li>
+            <li class="method-item write" data-contract="token" data-method="transfer_from">transfer_from</li>
+            <li class="method-item write" data-contract="token" data-method="approve">approve</li>
+            <li class="method-item write" data-contract="token" data-method="set_admin">set_admin</li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title" data-contract="escrow">
+            <span class="contract-icon">🔒</span> Escrow Contract
+            <span class="chevron">▾</span>
+          </div>
+          <ul id="escrow-methods" class="method-list">
+            <li class="method-item read" data-contract="escrow" data-method="get_escrow_info">get_escrow_info</li>
+            <li class="method-item read" data-contract="escrow" data-method="get_state">get_state</li>
+            <li class="method-item read" data-contract="escrow" data-method="is_deadline_passed">is_deadline_passed</li>
+            <li class="method-item write" data-contract="escrow" data-method="initialize">initialize</li>
+            <li class="method-item write" data-contract="escrow" data-method="fund">fund</li>
+            <li class="method-item write" data-contract="escrow" data-method="mark_delivered">mark_delivered</li>
+            <li class="method-item write" data-contract="escrow" data-method="approve_delivery">approve_delivery</li>
+            <li class="method-item write" data-contract="escrow" data-method="request_refund">request_refund</li>
+            <li class="method-item write" data-contract="escrow" data-method="resolve_dispute">resolve_dispute</li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main">
+      <!-- Welcome screen -->
+      <div id="welcome-screen">
+        <div class="welcome-content">
+          <h1>Soroban API Explorer</h1>
+          <p>Interactive documentation and testing interface for Soroban smart contracts.</p>
+          <div class="welcome-cards">
+            <div class="card">
+              <div class="card-icon">🪙</div>
+              <h3>Token Contract</h3>
+              <p>Fungible token with mint, burn, transfer, and allowance support.</p>
+            </div>
+            <div class="card">
+              <div class="card-icon">🔒</div>
+              <h3>Escrow Contract</h3>
+              <p>Secure two-party transactions with arbiter dispute resolution.</p>
+            </div>
+            <div class="card">
+              <div class="card-icon">⚡</div>
+              <h3>Live Testing</h3>
+              <p>Connect Freighter and invoke contract functions directly from the browser.</p>
+            </div>
+          </div>
+          <p class="welcome-hint">← Select a method from the sidebar to get started</p>
+        </div>
+      </div>
+
+      <!-- Method explorer -->
+      <div id="method-explorer" style="display:none">
+        <div class="explorer-header">
+          <div class="method-badge-wrap">
+            <span id="method-type-badge" class="badge"></span>
+            <h2 id="method-title"></h2>
+          </div>
+          <p id="method-description" class="method-desc"></p>
+        </div>
+
+        <div class="explorer-body">
+          <!-- Left: params + code gen -->
+          <div class="explorer-left">
+            <div class="panel">
+              <div class="panel-header">
+                <span>Contract ID</span>
+              </div>
+              <div class="panel-body">
+                <input id="contract-id-input" type="text" class="input-full" placeholder="C... (Stellar contract address)" />
+              </div>
+            </div>
+
+            <div class="panel" id="params-panel">
+              <div class="panel-header">
+                <span>Parameters</span>
+                <span id="params-count" class="badge badge-sm"></span>
+              </div>
+              <div class="panel-body" id="params-form"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <span>Code Generation</span>
+                <div class="lang-tabs">
+                  <button class="lang-tab active" data-lang="typescript">TypeScript</button>
+                  <button class="lang-tab" data-lang="javascript">JavaScript</button>
+                  <button class="lang-tab" data-lang="python">Python</button>
+                  <button class="lang-tab" data-lang="curl">cURL</button>
+                </div>
+              </div>
+              <div class="panel-body code-panel">
+                <button id="copy-code-btn" class="btn btn-ghost btn-xs copy-btn" title="Copy code">⎘ Copy</button>
+                <pre id="code-output"><code></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: response + auth -->
+          <div class="explorer-right">
+            <div class="panel auth-panel">
+              <div class="panel-header">
+                <span>Authentication</span>
+                <span id="auth-required-badge" class="badge badge-sm"></span>
+              </div>
+              <div class="panel-body" id="auth-info"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <span>Execute</span>
+              </div>
+              <div class="panel-body">
+                <div class="execute-row">
+                  <button id="simulate-btn" class="btn btn-secondary">Simulate</button>
+                  <button id="invoke-btn" class="btn btn-primary">Invoke</button>
+                </div>
+                <p class="execute-hint">Simulate runs a read-only preflight. Invoke submits a signed transaction.</p>
+              </div>
+            </div>
+
+            <div class="panel" id="response-panel" style="display:none">
+              <div class="panel-header">
+                <span>Response</span>
+                <span id="response-status" class="badge"></span>
+              </div>
+              <div class="panel-body code-panel">
+                <button id="copy-response-btn" class="btn btn-ghost btn-xs copy-btn" title="Copy response">⎘ Copy</button>
+                <pre id="response-output"><code></code></pre>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header"><span>Validation</span></div>
+              <div class="panel-body" id="validation-output">
+                <p class="muted">Fill in parameters to see validation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="api-spec.js"></script>
+  <script src="codegen.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

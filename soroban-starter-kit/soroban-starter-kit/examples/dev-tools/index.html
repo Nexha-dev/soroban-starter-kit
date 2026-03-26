@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soroban Developer Tools</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Soroban Dev Tools</span>
+        <span class="version-badge">v1.0</span>
+      </div>
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="scaffolder">⚙ Scaffolder</button>
+        <button class="tab-btn" data-tab="debugger">🐛 Debugger</button>
+        <button class="tab-btn" data-tab="profiler">📊 Profiler</button>
+        <button class="tab-btn" data-tab="analyzer">🔍 Analyzer</button>
+        <button class="tab-btn" data-tab="docs">📚 Docs</button>
+      </nav>
+    </header>
+
+    <!-- Tab panels -->
+    <main id="content">
+
+      <!-- ── Scaffolder ─────────────────────────────────────────────────── -->
+      <section id="tab-scaffolder" class="tab-panel active">
+        <div class="panel-header-bar">
+          <div>
+            <h2>Contract Scaffolder</h2>
+            <p class="subtitle">Generate Soroban contract boilerplate and project templates</p>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Contract Type</div>
+              <div class="option-grid" id="contract-type-grid">
+                <label class="option-card selected">
+                  <input type="radio" name="contract-type" value="token" checked />
+                  <span class="option-icon">🪙</span>
+                  <span class="option-label">Token</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="contract-type" value="escrow" />
+                  <span class="option-icon">🔒</span>
+                  <span class="option-label">Escrow</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="contract-type" value="nft" />
+                  <span class="option-icon">🖼</span>
+                  <span class="option-label">NFT</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="contract-type" value="dao" />
+                  <span class="option-icon">🏛</span>
+                  <span class="option-label">DAO</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="contract-type" value="multisig" />
+                  <span class="option-icon">🔑</span>
+                  <span class="option-label">Multisig</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="contract-type" value="blank" />
+                  <span class="option-icon">📄</span>
+                  <span class="option-label">Blank</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Configuration</div>
+              <div class="form-group">
+                <label>Contract Name</label>
+                <input id="sc-name" type="text" class="input" placeholder="my_contract" value="my_token" />
+              </div>
+              <div class="form-group">
+                <label>Author</label>
+                <input id="sc-author" type="text" class="input" placeholder="Your Name" />
+              </div>
+              <div class="form-group">
+                <label>Soroban SDK Version</label>
+                <select id="sc-sdk-version" class="input">
+                  <option value="21">21 (latest)</option>
+                  <option value="20">20</option>
+                  <option value="19">19</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Features</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" id="feat-events" checked /> Emit events</label>
+                  <label class="checkbox-label"><input type="checkbox" id="feat-errors" checked /> Custom errors</label>
+                  <label class="checkbox-label"><input type="checkbox" id="feat-tests" checked /> Test module</label>
+                  <label class="checkbox-label"><input type="checkbox" id="feat-deploy" /> Deploy script</label>
+                </div>
+              </div>
+              <button id="generate-btn" class="btn btn-primary btn-full">Generate Boilerplate</button>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card flex-grow">
+              <div class="card-title-row">
+                <span class="card-title">Generated Code</span>
+                <div class="file-tabs" id="scaffold-file-tabs"></div>
+                <button class="btn btn-ghost btn-xs" id="copy-scaffold-btn">⎘ Copy</button>
+              </div>
+              <pre class="code-block" id="scaffold-output"><code class="muted">Configure options and click Generate →</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Debugger ───────────────────────────────────────────────────── -->
+      <section id="tab-debugger" class="tab-panel">
+        <div class="panel-header-bar">
+          <div>
+            <h2>Debugger &amp; Decoder</h2>
+            <p class="subtitle">Decode transactions, parse events, and look up error codes</p>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">XDR / Transaction Decoder</div>
+              <div class="form-group">
+                <label>Paste XDR or Transaction Hash</label>
+                <textarea id="xdr-input" class="input textarea" rows="5" placeholder="AAAAAgAAAAA... or transaction hash"></textarea>
+              </div>
+              <div class="form-group">
+                <label>XDR Type</label>
+                <select id="xdr-type" class="input">
+                  <option value="auto">Auto-detect</option>
+                  <option value="TransactionEnvelope">TransactionEnvelope</option>
+                  <option value="TransactionResult">TransactionResult</option>
+                  <option value="ScVal">ScVal</option>
+                  <option value="OperationResult">OperationResult</option>
+                </select>
+              </div>
+              <button id="decode-btn" class="btn btn-primary">Decode</button>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Error Code Lookup</div>
+              <div class="form-group">
+                <label>Contract</label>
+                <select id="error-contract" class="input">
+                  <option value="token">Token Contract</option>
+                  <option value="escrow">Escrow Contract</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Error Code</label>
+                <input id="error-code-input" type="number" class="input" placeholder="e.g. 1" min="1" />
+              </div>
+              <button id="lookup-error-btn" class="btn btn-primary">Look Up</button>
+              <div id="error-lookup-result" class="result-box" style="display:none"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Event Parser</div>
+              <div class="form-group">
+                <label>Raw Event JSON (from RPC response)</label>
+                <textarea id="event-input" class="input textarea" rows="4" placeholder='{"type":"contract","ledger":"...","contractId":"...","topic":[],"value":{}}'></textarea>
+              </div>
+              <button id="parse-event-btn" class="btn btn-primary">Parse Event</button>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card flex-grow">
+              <div class="card-title-row">
+                <span class="card-title">Decoded Output</span>
+                <button class="btn btn-ghost btn-xs" id="copy-debug-btn">⎘ Copy</button>
+              </div>
+              <pre class="code-block" id="debug-output"><code class="muted">Paste XDR or an event to decode →</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Profiler ───────────────────────────────────────────────────── -->
+      <section id="tab-profiler" class="tab-panel">
+        <div class="panel-header-bar">
+          <div>
+            <h2>Cost &amp; Fee Profiler</h2>
+            <p class="subtitle">Estimate compute units, fees, and storage costs for contract operations</p>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Operation</div>
+              <div class="form-group">
+                <label>Contract</label>
+                <select id="prof-contract" class="input">
+                  <option value="token">Token Contract</option>
+                  <option value="escrow">Escrow Contract</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Method</label>
+                <select id="prof-method" class="input"></select>
+              </div>
+              <div class="form-group">
+                <label>Network</label>
+                <select id="prof-network" class="input">
+                  <option value="testnet">Testnet</option>
+                  <option value="mainnet">Mainnet</option>
+                </select>
+              </div>
+              <button id="profile-btn" class="btn btn-primary">Estimate Costs</button>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Ledger Entry Estimator</div>
+              <div class="form-group">
+                <label>Storage Type</label>
+                <select id="storage-type" class="input">
+                  <option value="instance">Instance</option>
+                  <option value="persistent">Persistent</option>
+                  <option value="temporary">Temporary</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Number of Entries</label>
+                <input id="entry-count" type="number" class="input" value="1" min="1" max="100" />
+              </div>
+              <div class="form-group">
+                <label>Avg Entry Size (bytes)</label>
+                <input id="entry-size" type="number" class="input" value="64" min="1" />
+              </div>
+              <button id="estimate-storage-btn" class="btn btn-secondary">Estimate Storage</button>
+            </div>
+          </div>
+
+          <div class="col">
+            <div id="profiler-results" class="profiler-results">
+              <div class="metric-placeholder">
+                <span class="metric-icon">📊</span>
+                <p>Select an operation and click Estimate Costs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Analyzer ───────────────────────────────────────────────────── -->
+      <section id="tab-analyzer" class="tab-panel">
+        <div class="panel-header-bar">
+          <div>
+            <h2>Code Analyzer</h2>
+            <p class="subtitle">Paste Rust contract code for best-practice checks and quality analysis</p>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Paste Contract Code</div>
+              <textarea id="analyzer-input" class="input textarea" rows="18"
+                placeholder="#[contract]&#10;pub struct MyContract;&#10;&#10;#[contractimpl]&#10;impl MyContract {&#10;    pub fn hello(env: Env) -> String {&#10;        String::from_str(&env, &quot;Hello&quot;)&#10;    }&#10;}"></textarea>
+              <div style="margin-top:10px; display:flex; gap:8px;">
+                <button id="analyze-btn" class="btn btn-primary">Analyze</button>
+                <button id="load-token-sample" class="btn btn-ghost btn-sm">Load Token Sample</button>
+                <button id="load-escrow-sample" class="btn btn-ghost btn-sm">Load Escrow Sample</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card flex-grow">
+              <div class="card-title">Analysis Results</div>
+              <div id="analyzer-results">
+                <p class="muted">Paste code and click Analyze to see results.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Docs ───────────────────────────────────────────────────────── -->
+      <section id="tab-docs" class="tab-panel">
+        <div class="panel-header-bar">
+          <div>
+            <h2>Developer Documentation</h2>
+            <p class="subtitle">Guides, best practices, and tutorials for Soroban development</p>
+          </div>
+        </div>
+
+        <div class="docs-layout">
+          <nav class="docs-nav" id="docs-nav"></nav>
+          <article class="docs-content" id="docs-content"></article>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="tools/scaffolder.js"></script>
+  <script src="tools/debugger.js"></script>
+  <script src="tools/profiler.js"></script>
+  <script src="tools/analyzer.js"></script>
+  <script src="tools/docs.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

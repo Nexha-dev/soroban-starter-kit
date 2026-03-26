@@ -1,0 +1,141 @@
+name: Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths: ['infra/**', 'scripts/infra.sh']
+  pull_request:
+    branches: [main]
+    paths: ['infra/**', 'scripts/infra.sh']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+      cloud:
+        description: 'Cloud provider'
+        required: true
+        default: aws
+        type: choice
+        options: [aws, gcp, azure]
+      action:
+        description: 'Action to perform'
+        required: true
+        default: plan
+        type: choice
+        options: [plan, apply, destroy]
+
+env:
+  TF_VERSION: '1.7.5'
+  TF_IN_AUTOMATION: 'true'
+
+jobs:
+  # ── Compliance & validation (always runs) ──────────────────────────────────
+  compliance:
+    name: Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run compliance checks
+        run: bash scripts/infra.sh compliance
+
+      - name: Validate Terraform syntax
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: terraform fmt check
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: terraform validate (staging)
+        run: |
+          terraform -chdir=infra/terraform/envs/staging init -backend=false
+          terraform -chdir=infra/terraform/envs/staging validate
+
+  # ── Plan (PRs and pushes) ──────────────────────────────────────────────────
+  plan:
+    name: Plan (${{ github.event.inputs.environment || 'staging' }})
+    runs-on: ubuntu-latest
+    needs: compliance
+    env:
+      ENV: ${{ github.event.inputs.environment || 'staging' }}
+      CLOUD: ${{ github.event.inputs.cloud || 'aws' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        if: env.CLOUD == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            us-east-1
+        continue-on-error: true   # skip if secrets not configured
+
+      - name: terraform init
+        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} init -input=false -backend=false
+
+      - name: terraform plan
+        run: |
+          terraform -chdir=infra/terraform/envs/${{ env.ENV }} plan \
+            -var="cloud=${{ env.CLOUD }}" \
+            -input=false \
+            -no-color \
+            -out=tfplan
+        continue-on-error: true
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ env.ENV }}
+          path: infra/terraform/envs/${{ env.ENV }}/tfplan
+          retention-days: 7
+
+  # ── Apply (manual trigger, production requires approval) ──────────────────
+  apply:
+    name: Apply (${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    needs: plan
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+    environment:
+      name: ${{ github.event.inputs.environment }}   # maps to GitHub environment with protection rules
+    env:
+      ENV: ${{ github.event.inputs.environment }}
+      CLOUD: ${{ github.event.inputs.cloud }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        if: env.CLOUD == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            us-east-1
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.ENV }}
+          path: infra/terraform/envs/${{ env.ENV }}
+
+      - name: terraform init
+        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} init -input=false
+
+      - name: terraform apply
+        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} apply -input=false tfplan
+
+      - name: Print outputs
+        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} output -json
