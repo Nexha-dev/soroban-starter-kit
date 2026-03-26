@@ -1,0 +1,20 @@
+{
+  "locale": "de-DE",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "Guthaben",
+    "nav.pending": "Ausstehend ({count})",
+    "nav.history": "Verlauf",
+    "nav.settings": "Einstellungen",
+    "common.loading": "Wird geladen…",
+    "common.error": "Ein Fehler ist aufgetreten",
+    "common.save": "Speichern",
+    "common.cancel": "Abbrechen",
+    "common.confirm": "Bestätigen",
+    "common.close": "Schließen",
+    "tx.count": {
+      "one": "{{count}} Transaktion",
+      "other": "{{count}} Transaktionen"
+    }
+  }
+}

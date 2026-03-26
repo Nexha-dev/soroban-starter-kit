@@ -23,3 +23,6 @@ export { syncService } from './sync';
 // Logger
 export { logger, type LogLevel, type LogEntry, type StellarLogData } from './logger';
 export { installFetchLogger } from './logger/middleware';
+// Security Service
+export { securityService, encryptData, decryptData } from './security';
+export type { SecuritySession, AuditLogEntry, SecurityAlert, SecurityConfig, SecurityState, AuthMethod, AlertSeverity } from './security';
