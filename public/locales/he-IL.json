@@ -1,0 +1,22 @@
+{
+  "locale": "he-IL",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "יתרות",
+    "nav.pending": "ממתין ({count})",
+    "nav.history": "היסטוריה",
+    "nav.settings": "הגדרות",
+    "common.loading": "טוען…",
+    "common.error": "אירעה שגיאה",
+    "common.save": "שמור",
+    "common.cancel": "ביטול",
+    "common.confirm": "אישור",
+    "common.close": "סגור",
+    "tx.count": {
+      "one": "עסקה אחת",
+      "two": "שתי עסקאות",
+      "many": "{{count}} עסקאות",
+      "other": "{{count}} עסקאות"
+    }
+  }
+}

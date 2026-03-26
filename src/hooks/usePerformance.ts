@@ -2,6 +2,8 @@ import { performanceMetricsCollector } from '../services/performance/metricsColl
 import { performanceBudgetManager } from '../services/performance/budgetManager';
 import { performanceAnalyzer } from '../services/performance/analyzer';
 import { performanceComparator } from '../services/performance/comparator';
+import { monitor, optimizer, reporter } from '../services/performance';
+import type { ThresholdViolationEvent, Bottleneck, Recommendation, PerformanceReport } from '../services/performance';
 import { useState, useEffect } from 'react';
 
 /**
@@ -99,4 +101,72 @@ export function usePerformanceBudgets() {
     budgets,
     addBudget: performanceBudgetManager.addBudget.bind(performanceBudgetManager),
   };
+}
+
+/**
+ * Hook that subscribes to Monitor threshold violation events.
+ * Keeps the last 50 violations.
+ */
+export function usePerformanceViolations(): ThresholdViolationEvent[] {
+  const [violations, setViolations] = useState<ThresholdViolationEvent[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = monitor.onViolation((event) => {
+      setViolations((prev) => [...prev, event].slice(-50));
+    });
+    return unsubscribe;
+  }, []);
+
+  return violations;
+}
+
+/**
+ * Hook that returns current bottlenecks from the optimizer, refreshed every 10 seconds.
+ */
+export function useBottlenecks(): Bottleneck[] {
+  const [bottlenecks, setBottlenecks] = useState<Bottleneck[]>([]);
+
+  useEffect(() => {
+    setBottlenecks(optimizer.getBottlenecks());
+    const interval = setInterval(() => {
+      setBottlenecks(optimizer.getBottlenecks());
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return bottlenecks;
+}
+
+/**
+ * Hook that returns current recommendations from the optimizer, refreshed every 10 seconds.
+ */
+export function useRecommendations(): Recommendation[] {
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+
+  useEffect(() => {
+    setRecommendations(optimizer.getRecommendations());
+    const interval = setInterval(() => {
+      setRecommendations(optimizer.getRecommendations());
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return recommendations;
+}
+
+/**
+ * Hook that generates a performance report on demand.
+ */
+export function usePerformanceReport(): {
+  report: PerformanceReport | null;
+  generateReport: () => void;
+} {
+  const [report, setReport] = useState<PerformanceReport | null>(null);
+
+  const generateReport = () => {
+    const generated = reporter.generate();
+    setReport(generated);
+  };
+
+  return { report, generateReport };
 }
