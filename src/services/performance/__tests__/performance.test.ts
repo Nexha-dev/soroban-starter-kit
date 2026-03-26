@@ -49,6 +49,10 @@ describe('PerformanceBudgetManager', () => {
 });
 
 describe('PerformanceAnalyzer', () => {
+  beforeEach(() => {
+    performanceAnalyzer.clearHistory();
+  });
+
   it('should analyze performance data', () => {
     const vitals = { lcp: 5000, fid: 200, cls: 0.3 };
     const analysis = performanceAnalyzer.analyze(vitals, null);
