@@ -18,6 +18,7 @@ export { NotificationCenter } from './NotificationCenter';
 export { NotificationPreferences } from './NotificationPreferences';
 export { AlertRules } from './AlertRules';
 export { ThemeToggle } from './ThemeToggle';
+export { PWADashboard } from './PWADashboard';
 export { TutorialOverlay, TutorialLauncher } from './TutorialOverlay';
 export { FormField } from './FormField';
 export { AdvancedBalanceDisplay } from './AdvancedBalanceDisplay';

@@ -12,7 +12,8 @@ import { NavItem } from './services/navigation/types';
 import { DataPoint } from './services/visualization/types';
 import { ThemeToggle } from './components/ThemeToggle';
 import { TutorialOverlay, TutorialLauncher } from './components/TutorialOverlay';
-import { InstallBanner, PushToggle } from './components/PWAControls';
+import { InstallBanner } from './components/PWAControls';
+import { PWADashboard } from './components/PWADashboard';
 import { useConnectivity } from './context/ConnectivityContext';
 import { useStorage } from './context/StorageContext';
 import { useTransactionQueue } from './context/TransactionQueueContext';
@@ -204,7 +205,7 @@ function App(): JSX.Element {
           <OfflineIndicator />
           <ConnectivityStatus />
           <NotificationCenter />
-          <PushToggle />
+          <PWADashboard />
           <TutorialLauncher />
           <ThemeToggle />
           <button
