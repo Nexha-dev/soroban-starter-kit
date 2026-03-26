@@ -33,7 +33,7 @@ interface OptimizedStateProviderProps {
 export function OptimizedStateProvider({
   children,
   persistenceEnabled = true,
-  devToolsEnabled = process.env.NODE_ENV === 'development',
+  devToolsEnabled = import.meta.env.DEV,
 }: OptimizedStateProviderProps): JSX.Element {
   const [state, setState] = useState<NormalizedState>(stateManager.getState());
   const [metrics, setMetrics] = useState<StateMetrics>(stateManager.getMetrics());

@@ -10,18 +10,20 @@ describe('StateSynchronizer', () => {
   });
 
   describe('Event Emission', () => {
-    it('should emit sync events', (done) => {
-      const listener = (event: SyncEvent) => {
-        expect(event.type).toBe('update');
-        expect(event.timestamp).toBeGreaterThan(0);
-        done();
-      };
+    it('should emit sync events', () => {
+      return new Promise<void>((resolve) => {
+        const listener = (event: SyncEvent) => {
+          expect(event.type).toBe('update');
+          expect(event.timestamp).toBeGreaterThan(0);
+          resolve();
+        };
 
-      stateSynchronizer.subscribe(listener);
-      stateSynchronizer.emit({
-        type: 'update',
-        timestamp: Date.now(),
-        source: 'test',
+        stateSynchronizer.subscribe(listener);
+        stateSynchronizer.emit({
+          type: 'update',
+          timestamp: Date.now(),
+          source: 'test',
+        });
       });
     });
 
@@ -101,21 +103,23 @@ describe('StateSynchronizer', () => {
   });
 
   describe('Event Types', () => {
-    it('should handle different event types', (done) => {
-      const events: SyncEvent[] = [];
+    it('should handle different event types', () => {
+      return new Promise<void>((resolve) => {
+        const events: SyncEvent[] = [];
 
-      stateSynchronizer.subscribe((event) => {
-        events.push(event);
-        if (events.length === 4) {
-          expect(events.map(e => e.type)).toEqual(['update', 'delete', 'clear', 'conflict']);
-          done();
-        }
+        stateSynchronizer.subscribe((event) => {
+          events.push(event);
+          if (events.length === 4) {
+            expect(events.map(e => e.type)).toEqual(['update', 'delete', 'clear', 'conflict']);
+            resolve();
+          }
+        });
+
+        stateSynchronizer.emit({ type: 'update', timestamp: Date.now(), source: 'test' });
+        stateSynchronizer.emit({ type: 'delete', timestamp: Date.now(), source: 'test' });
+        stateSynchronizer.emit({ type: 'clear', timestamp: Date.now(), source: 'test' });
+        stateSynchronizer.emit({ type: 'conflict', timestamp: Date.now(), source: 'test' });
       });
-
-      stateSynchronizer.emit({ type: 'update', timestamp: Date.now(), source: 'test' });
-      stateSynchronizer.emit({ type: 'delete', timestamp: Date.now(), source: 'test' });
-      stateSynchronizer.emit({ type: 'clear', timestamp: Date.now(), source: 'test' });
-      stateSynchronizer.emit({ type: 'conflict', timestamp: Date.now(), source: 'test' });
     });
   });
 });

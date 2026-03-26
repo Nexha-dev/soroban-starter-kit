@@ -197,12 +197,12 @@ class SecurityService {
     }
     const key = await crypto.subtle.importKey(
       'raw',
-      keyBytes,
+      keyBytes as unknown as BufferSource,
       { name: 'HMAC', hash: 'SHA-1' },
       false,
       ['sign'],
     );
-    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, counterBytes));
+    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, counterBytes as unknown as BufferSource));
     const offset = sig[19] & 0xf;
     const otp =
       (((sig[offset] & 0x7f) << 24) |

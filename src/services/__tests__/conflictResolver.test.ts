@@ -5,6 +5,9 @@
 import { conflictResolver } from '../conflictResolver';
 
 describe('ConflictResolver', () => {
+  beforeEach(() => {
+    conflictResolver.clearHistory();
+  });
   describe('Conflict Detection', () => {
     it('should detect conflicts', () => {
       const local = { id: '1', value: 'local' };

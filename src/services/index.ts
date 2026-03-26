@@ -64,6 +64,9 @@ export { installFetchLogger } from './logger/middleware';
 export { securityService, encryptData, decryptData } from './security';
 export type { SecuritySession, AuditLogEntry, SecurityAlert, SecurityConfig, SecurityState, AuthMethod, AlertSeverity } from './security';
 
+// Wallet Service
+export { walletService, WALLET_REGISTRY } from './wallet';
+export type { WalletId, WalletInfo, WalletAccount, WalletConnection, WalletState, WalletPreferences, ConnectionEvent, NetworkPassphrase } from './wallet';
 // Logging Service
 export { loggingService } from './logging';
 export type { LogEntry, ParsedLog, LogQuery, LogSearchResult, AnomalyAlert, RetentionPolicy, LogStats, LogLevel, LogSource } from './logging';

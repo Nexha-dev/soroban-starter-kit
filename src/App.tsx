@@ -9,6 +9,8 @@ import { TokenTransferWizard } from './components/TokenTransferWizard';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { PortfolioAnalytics } from './components/PortfolioAnalytics';
 import { AdminPanel } from './components/AdminPanel';
+import { ApiGatewayPortal } from './components/ApiGatewayPortal';
+import { DatabasePanel } from './components/DatabasePanel';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
 import {
@@ -86,6 +88,7 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
+  const [activeTab, setActiveTab] = useState<'balances' | 'analytics' | 'transfer' | 'build' | 'pending' | 'history' | 'workflows' | 'table' | 'search' | 'dashboard' | 'settings'>('balances');
   const [activeTab, setActiveTab] = useState<Tab>('balances');
   const [activeTab, setActiveTab] = useState<ActiveTab>('balances');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
@@ -102,6 +105,9 @@ function App(): JSX.Element {
     { key: 'retries',   header: 'Retries',  accessor: (r) => r.retryCount, sortable: true  },
   ];
 
+  // Demo function to simulate transaction submission
+  const [breadcrumbs, setBreadcrumbs] = useState([{ label: 'Home' }]);
+  const [chartData, setChartData] = useState<DataPoint[]>([]);
   const handleSubmitTransaction = async (): Promise<void> => {
     setIsDemoLoading(true);
     try {
@@ -324,6 +330,25 @@ function App(): JSX.Element {
 
   const renderComponent = (type: ComponentType) => {
     switch (type) {
+      case 'balances':    return <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances." />;
+      case 'transactions': return <TransactionList transactions={[...pendingTransactions, ...syncedTransactions]} onRetry={retryTransaction} onDelete={deleteTransaction} onResolveConflict={resolveConflict} emptyMessage="No transactions." />;
+      case 'sync':        return <SyncStatus />;
+      case 'actions':     return (
+        <div className="flex gap-md items-center">
+          <button onClick={handleSubmitTransaction} disabled={isDemoLoading} className="btn btn-primary">
+            {isDemoLoading ? 'Creating...' : '＋ Queue Transfer (Demo)'}
+          </button>
+          <button onClick={syncNow} disabled={!isOnline || syncStatus.isSyncing} className="btn btn-secondary">
+            {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+          </button>
+        </div>
+      );
+      case 'storage':     return (
+        <div className="flex flex-col gap-sm">
+          <div className="flex justify-between"><span className="text-muted">Cached Items</span><span>{balances.length + escrows.length}</span></div>
+          <div className="flex justify-between"><span className="text-muted">Transactions</span><span>{pendingTransactions.length + syncedTransactions.length}</span></div>
+        </div>
+      );
       case 'balances':
         return <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances." />;
       case 'transactions':
@@ -479,6 +504,19 @@ function App(): JSX.Element {
                   '+ Queue Transfer (Demo)'
                 )}
               </button>
+            </div>
+          </section>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-md mb-lg" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>
+            <button onClick={() => setActiveTab('balances')} className={activeTab === 'balances' ? 'btn btn-primary' : 'btn btn-secondary'}>📊 Cached Balances</button>
+            <button onClick={() => setActiveTab('analytics')} className={activeTab === 'analytics' ? 'btn btn-primary' : 'btn btn-secondary'}>📈 Analytics</button>
+            <button onClick={() => setActiveTab('transfer')} className={activeTab === 'transfer' ? 'btn btn-primary' : 'btn btn-secondary'}>💸 Transfer</button>
+            <button onClick={() => setActiveTab('build')} className={activeTab === 'build' ? 'btn btn-primary' : 'btn btn-secondary'}>🔨 Build Transaction</button>
+            <button onClick={() => setActiveTab('pending')} className={activeTab === 'pending' ? 'btn btn-primary' : 'btn btn-secondary'}>⏳ Pending ({pendingTransactions.length})</button>
+            <button onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'btn btn-primary' : 'btn btn-secondary'}>✓ Synced History ({syncedTransactions.length})</button>
+            <button onClick={() => setActiveTab('workflows')} className={activeTab === 'workflows' ? 'btn btn-primary' : 'btn btn-secondary'}>🔀 Workflows</button>
+            <button onClick={() => setActiveTab('table')} className={activeTab === 'table' ? 'btn btn-primary' : 'btn btn-secondary'}>📋 Table View</button>
       {/* Main Content */}
       <main className="main-content container">
         {builderMode ? (
@@ -492,15 +530,71 @@ function App(): JSX.Element {
           <div className="card-header">
             <span className="card-title">Quick Actions</span>
           </div>
-          
-          <div className="flex gap-md items-center">
-            <button
-              onClick={handleSubmitTransaction}
-              disabled={isDemoLoading}
-              className="btn btn-primary"
-            >
-              {isDemoLoading ? (
+
+          {/* Content Area */}
+          <div className="grid" style={{ gridTemplateColumns: '1fr 300px' }}>
+            {/* Main Panel */}
+            <div>
+              {activeTab === 'balances' && (
                 <>
+                  {!isOnline && <p className="text-warning mb-md">You're offline. Showing cached balances from your last online session.</p>}
+                  <AdvancedBalanceDisplay balances={balances} emptyMessage="No cached balances. Connect to the network to fetch your balances." />
+                </>
+              )}
+              {activeTab === 'analytics' && <PortfolioDashboard />}
+              {activeTab === 'transfer' && <TokenTransferWizard />}
+              {activeTab === 'build' && <TransactionFormBuilder />}
+              {activeTab === 'pending' && (
+                <>
+                  <h2 className="mb-md">Pending Transactions</h2>
+                  {!isOnline && <p className="text-warning mb-md">You're offline. Transactions will be queued and submitted when connection is restored.</p>}
+                  <TransactionList transactions={pendingTransactions} onRetry={retryTransaction} onDelete={deleteTransaction} onResolveConflict={resolveConflict} emptyMessage="No pending transactions." />
+                </>
+              )}
+              {activeTab === 'history' && (
+                <>
+                  <h2 className="mb-md">Synced Transactions</h2>
+                  <TransactionList transactions={syncedTransactions} emptyMessage="No synced transactions yet." />
+                </>
+              )}
+              {activeTab === 'workflows' && (
+                <WorkflowLauncher onComplete={(templateId, values) => console.info('Workflow completed:', templateId, values)} />
+              )}
+              {activeTab === 'table' && (
+                <DataTable
+                  caption="All Transactions"
+                  data={[...pendingTransactions, ...syncedTransactions]}
+                  columns={txColumns}
+                  getRowId={(r) => r.id}
+                  bulkActions={[{ label: 'Delete selected', icon: '🗑', action: (rows) => rows.forEach((r) => deleteTransaction(r.id)) }]}
+                  exportFormats={['csv', 'json']}
+                  renderExpanded={(r) => (
+                    <pre style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
+                      {JSON.stringify(r.params, null, 2)}
+                    </pre>
+                  )}
+                />
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div>
+              <SyncStatus />
+              <div className="card mt-lg">
+                <div className="card-header">
+                  <span className="card-title">Storage</span>
+                </div>
+                <button onClick={syncNow} disabled={!isOnline || syncStatus.isSyncing} className="btn btn-secondary">
+                  {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+                <span className="text-muted" style={{ marginLeft: 'auto' }}>
+                  {pendingTransactions.length} pending • {syncedTransactions.length} synced
+                </span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
                   {!isOnline && (
                     <p className="text-warning mb-md">
                       You're offline. Showing cached balances from your last online session.

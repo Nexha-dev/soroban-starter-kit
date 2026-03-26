@@ -131,8 +131,8 @@ class ConflictResolver {
   /**
    * Validate state consistency
    */
-  validateState(state: NormalizedState): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
+  validateState(state: NormalizedState): { valid: boolean; errors: Array<{ type: string; message: string }> } {
+    const errors: Array<{ type: string; message: string }> = [];
 
     // Check metadata consistency
     const balanceIds = Object.keys(state.balances);
@@ -140,29 +140,28 @@ class ConflictResolver {
 
     balanceIds.forEach(id => {
       if (!metaBalanceIds.includes(id)) {
-        errors.push(`Balance ${id} not in metadata`);
+        errors.push({ type: 'missing_metadata', message: `Balance ${id} not in metadata` });
       }
     });
 
     metaBalanceIds.forEach(id => {
       if (!balanceIds.includes(id)) {
-        errors.push(`Metadata references non-existent balance ${id}`);
+        errors.push({ type: 'orphaned_item', message: `Metadata references non-existent balance ${id}` });
       }
     });
 
-    // Similar checks for escrows and transactions
     const escrowIds = Object.keys(state.escrows);
     const metaEscrowIds = state.metadata.escrowIds;
 
     escrowIds.forEach(id => {
       if (!metaEscrowIds.includes(id)) {
-        errors.push(`Escrow ${id} not in metadata`);
+        errors.push({ type: 'missing_metadata', message: `Escrow ${id} not in metadata` });
       }
     });
 
     metaEscrowIds.forEach(id => {
       if (!escrowIds.includes(id)) {
-        errors.push(`Metadata references non-existent escrow ${id}`);
+        errors.push({ type: 'orphaned_item', message: `Metadata references non-existent escrow ${id}` });
       }
     });
 
@@ -171,13 +170,13 @@ class ConflictResolver {
 
     txIds.forEach(id => {
       if (!metaTxIds.includes(id)) {
-        errors.push(`Transaction ${id} not in metadata`);
+        errors.push({ type: 'missing_metadata', message: `Transaction ${id} not in metadata` });
       }
     });
 
     metaTxIds.forEach(id => {
       if (!txIds.includes(id)) {
-        errors.push(`Metadata references non-existent transaction ${id}`);
+        errors.push({ type: 'orphaned_item', message: `Metadata references non-existent transaction ${id}` });
       }
     });
 

@@ -46,6 +46,18 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
     setExecutionTime(result.executionTime);
     setFacets(searchEngine.getFacets(allItems, searchQuery.filters));
 
+    // Update facets
+    const newFacets = searchEngine.getFacets(allItems, searchQuery.filters);
+    setFacets(newFacets);
+
+    // Record analytics
+    await searchManager.recordAnalytics(
+      query.text || '',
+      searchQuery.filters as Record<string, unknown>,
+      result.items.length,
+      result.executionTime
+    );
+  };
     // Fire-and-forget analytics
     searchManager.recordAnalytics(q.text ?? '', searchQuery.filters as Record<string, unknown>, result.total, result.executionTime);
   }, [allItems, selectedFacets, sortBy]);

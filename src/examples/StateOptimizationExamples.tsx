@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { OptimizedStateProvider } from './context/OptimizedStateContext';
-import { ConnectivityProvider } from './context/ConnectivityContext';
-import { StorageProvider } from './context/StorageContext';
-import { TransactionQueueProvider } from './context/TransactionQueueContext';
-import { StateDebugger } from './components/StateDebugger';
-import App from './App';
+import { OptimizedStateProvider } from '../context/OptimizedStateContext';
+import { ConnectivityProvider } from '../context/ConnectivityContext';
+import { StorageProvider } from '../context/StorageContext';
+import { TransactionQueueProvider } from '../context/TransactionQueueContext';
+import { StateDebugger } from '../components/StateDebugger';
+import App from '../App';
 
 /**
  * Example 1: Basic Setup
@@ -41,7 +41,7 @@ export function AppWithDebugger(): JSX.Element {
           <TransactionQueueProvider>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px' }}>
               <App />
-              {process.env.NODE_ENV === 'development' && <StateDebugger />}
+              {import.meta.env.DEV && <StateDebugger />}
             </div>
           </TransactionQueueProvider>
         </StorageProvider>
@@ -53,8 +53,8 @@ export function AppWithDebugger(): JSX.Element {
 /**
  * Example 3: Using Optimized State in Components
  */
-import { useOptimizedState } from './context/OptimizedStateContext';
-import { useBalances, useTransaction, useStateMetrics } from './hooks/useStateOptimization';
+import { useOptimizedState } from '../context/OptimizedStateContext';
+import { useBalances, useTransaction, useStateMetrics } from '../hooks/useStateOptimization';
 
 export function BalanceComponent(): JSX.Element {
   // Get all balances with memoization
@@ -125,7 +125,7 @@ export function BatchUpdateExample(): JSX.Element {
 /**
  * Example 5: Performance Monitoring
  */
-import { usePerformanceMonitor } from './hooks/useStateOptimization';
+import { usePerformanceMonitor } from '../hooks/useStateOptimization';
 
 export function PerformanceMonitoringExample(): JSX.Element {
   const monitor = usePerformanceMonitor('expensive-calculation');
@@ -151,7 +151,7 @@ export function PerformanceMonitoringExample(): JSX.Element {
 /**
  * Example 6: Custom Selectors
  */
-import { useStateSelector } from './hooks/useStateOptimization';
+import { useStateSelector } from '../hooks/useStateOptimization';
 
 export function CustomSelectorExample(): JSX.Element {
   // Get total balance across all tokens

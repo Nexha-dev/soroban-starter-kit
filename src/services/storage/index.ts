@@ -57,6 +57,7 @@ class StorageService {
   // ── Balances ──────────────────────────────────────────────────────────────
 
   async saveBalance(balance: Balance): Promise<void> {
+    await withDBError(() => this.conn.put('balances', { ...balance, lastUpdated: Date.now() }));
     return withDBError(() => this.conn.put('balances', { ...balance, lastUpdated: Date.now() }));
   }
 
@@ -75,6 +76,7 @@ class StorageService {
   // ── Escrows ───────────────────────────────────────────────────────────────
 
   async saveEscrow(escrow: EscrowData): Promise<void> {
+    await withDBError(() => this.conn.put('escrows', { ...escrow, lastUpdated: Date.now() }));
     return withDBError(() => this.conn.put('escrows', { ...escrow, lastUpdated: Date.now() }));
   }
 
@@ -93,6 +95,7 @@ class StorageService {
   // ── Transactions ──────────────────────────────────────────────────────────
 
   async savePendingTransaction(tx: CachedTransaction): Promise<void> {
+    await withDBError(() => this.conn.put('pendingTransactions', tx));
     return withDBError(() => this.conn.put('pendingTransactions', tx));
   }
 
@@ -105,6 +108,7 @@ class StorageService {
   }
 
   async deletePendingTransaction(id: string): Promise<void> {
+    await withDBError(() => this.conn.delete('pendingTransactions', id));
     return withDBError(() => this.conn.delete('pendingTransactions', id));
   }
 
@@ -123,6 +127,7 @@ class StorageService {
   // ── Preferences ───────────────────────────────────────────────────────────
 
   async savePreferences(prefs: UserPreferences): Promise<void> {
+    await withDBError(() => this.conn.put('preferences', prefs));
     return withDBError(() => this.conn.put('preferences', prefs));
   }
 
@@ -133,6 +138,7 @@ class StorageService {
   // ── Users ─────────────────────────────────────────────────────────────────
 
   async saveUser(user: UserRecord): Promise<void> {
+    await withDBError(() => this.conn.put('users', user));
     return withDBError(() => this.conn.put('users', user));
   }
 
@@ -147,6 +153,7 @@ class StorageService {
   // ── Settings ──────────────────────────────────────────────────────────────
 
   async setSetting(key: string, value: unknown): Promise<void> {
+    await withDBError(() =>
     return withDBError(() =>
       this.conn.put('settings', { key, value, updatedAt: Date.now() })
     );
@@ -163,6 +170,7 @@ class StorageService {
 
   async setCache(key: string, data: unknown, ttlSeconds = 3600): Promise<void> {
     const now = Date.now();
+    await withDBError(() =>
     return withDBError(() =>
       this.conn.put('cache', { data, timestamp: now, expiresAt: now + ttlSeconds * 1000 }, key)
     );

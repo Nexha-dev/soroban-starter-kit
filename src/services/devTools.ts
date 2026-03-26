@@ -20,7 +20,7 @@ interface StateSnapshot {
 
 class DevTools {
   private config: DevToolsConfig = {
-    enabled: process.env.NODE_ENV === 'development',
+    enabled: import.meta.env.DEV,
     logStateChanges: true,
     logPerformance: true,
     maxHistorySize: 50,

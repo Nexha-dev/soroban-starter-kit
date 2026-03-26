@@ -22,7 +22,7 @@ class PersistenceManager {
   };
 
   private lastPersistTime = 0;
-  private persistTimer: NodeJS.Timeout | null = null;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Initialize persistence

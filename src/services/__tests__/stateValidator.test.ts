@@ -5,6 +5,9 @@
 import { stateValidator } from '../stateValidator';
 
 describe('StateValidator', () => {
+  beforeEach(() => {
+    stateValidator.clearHistory();
+  });
   describe('State Validation', () => {
     it('should validate correct state', () => {
       const state = {

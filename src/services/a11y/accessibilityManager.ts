@@ -96,6 +96,25 @@ class AccessibilityManager {
   }
 
   /**
+   * Reset metrics to defaults
+   */
+  resetMetrics(): void {
+    this.metrics = {
+      wcagLevel: 'AA',
+      issuesFound: 0,
+      lastAuditTime: 0,
+      complianceScore: 100,
+    };
+  }
+
+  /**
+   * Clear all listeners
+   */
+  clearListeners(): void {
+    this.listeners.clear();
+  }
+
+  /**
    * Subscribe to settings changes
    */
   subscribe(listener: (settings: A11ySettings) => void): () => void {

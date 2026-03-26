@@ -6,6 +6,7 @@ import { stateManager, NormalizedState } from '../stateManager';
 
 describe('StateManager', () => {
   beforeEach(() => {
+    stateManager.clearListeners();
     stateManager.clear();
     stateManager.resetMetrics();
   });
@@ -111,14 +112,16 @@ describe('StateManager', () => {
   });
 
   describe('Subscriptions', () => {
-    it('should notify listeners on state change', (done) => {
-      const listener = (state: NormalizedState) => {
-        expect(state.balances['b1']).toBeDefined();
-        done();
-      };
+    it('should notify listeners on state change', () => {
+      return new Promise<void>((resolve) => {
+        const listener = (state: NormalizedState) => {
+          expect(state.balances['b1']).toBeDefined();
+          resolve();
+        };
 
-      stateManager.subscribe(listener);
-      stateManager.updateBalances({ 'b1': { id: 'b1' } });
+        stateManager.subscribe(listener);
+        stateManager.updateBalances({ 'b1': { id: 'b1' } });
+      });
     });
 
     it('should unsubscribe listeners', () => {

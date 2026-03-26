@@ -60,10 +60,11 @@ self.addEventListener('push', (event: PushEvent) => {
 });
 
 // Open app on notification click
-self.addEventListener('notificationclick', (event: NotificationClickEvent) => {
-  event.notification.close();
-  const url = (event.notification.data as { url?: string })?.url ?? '/';
-  event.waitUntil(
+self.addEventListener('notificationclick', (event: Event) => {
+  const e = event as NotificationEvent;
+  e.notification.close();
+  const url = (e.notification.data as { url?: string })?.url ?? '/';
+  e.waitUntil(
     self.clients.matchAll({ type: 'window' }).then(clients => {
       const existing = clients.find(c => c.url === url && 'focus' in c);
       return existing ? existing.focus() : self.clients.openWindow(url);
