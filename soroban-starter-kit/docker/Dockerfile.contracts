@@ -1,0 +1,14 @@
+# Rust contract builder
+FROM rust:1.78-slim AS contracts
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Soroban CLI
+RUN cargo install --locked stellar-cli --features opt
+
+WORKDIR /contracts
+COPY soroban-starter-kit/ .
+
+CMD ["stellar", "contract", "build"]
