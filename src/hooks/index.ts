@@ -13,4 +13,6 @@ export {
   useConflictResolution,
   useSyncEvents,
   usePerformanceMetrics,
-} from './useStateOptimization';
+} from "./useStateOptimization";
+
+export { useI18n } from "./useI18n";
