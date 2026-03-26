@@ -1,0 +1,20 @@
+{
+  "locale": "fa-IR",
+  "version": "1.0.0",
+  "translations": {
+    "nav.balances": "موجودی‌ها",
+    "nav.pending": "در انتظار ({count})",
+    "nav.history": "تاریخچه",
+    "nav.settings": "تنظیمات",
+    "common.loading": "در حال بارگذاری…",
+    "common.error": "خطایی رخ داد",
+    "common.save": "ذخیره",
+    "common.cancel": "لغو",
+    "common.confirm": "تأیید",
+    "common.close": "بستن",
+    "tx.count": {
+      "one": "{{count}} تراکنش",
+      "other": "{{count}} تراکنش"
+    }
+  }
+}

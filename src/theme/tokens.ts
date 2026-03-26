@@ -2,6 +2,14 @@ export type ThemeMode = 'dark' | 'light';
 
 export type ColorScheme = 'default' | 'ocean' | 'forest' | 'sunset' | 'high-contrast';
 
+export type LayoutDensity = 'compact' | 'comfortable' | 'spacious';
+
+export interface LayoutTokens {
+  density: LayoutDensity;
+  fontScale: number; // 0.8 – 1.4
+  borderRadius: 'sharp' | 'rounded' | 'pill';
+}
+
 export interface ThemeTokens {
   // Core palette
   colorPrimary: string;
@@ -92,4 +100,33 @@ export function applyTokens(tokens: ThemeTokens): void {
   root.style.setProperty('--color-bg-tertiary',    tokens.colorBgTertiary);
   root.style.setProperty('--color-border',         tokens.colorBorder);
   root.style.setProperty('--color-border-light',   tokens.colorBorderLight);
+}
+
+const densitySpacing: Record<LayoutDensity, { xs: string; sm: string; md: string; lg: string; xl: string }> = {
+  compact:     { xs: '2px',  sm: '4px',  md: '8px',  lg: '12px', xl: '16px' },
+  comfortable: { xs: '4px',  sm: '8px',  md: '16px', lg: '24px', xl: '32px' },
+  spacious:    { xs: '6px',  sm: '12px', md: '24px', lg: '36px', xl: '48px' },
+};
+
+const radiusMap: Record<LayoutTokens['borderRadius'], { sm: string; md: string; lg: string }> = {
+  sharp:   { sm: '2px',    md: '4px',    lg: '6px' },
+  rounded: { sm: '4px',    md: '8px',    lg: '12px' },
+  pill:    { sm: '9999px', md: '9999px', lg: '9999px' },
+};
+
+export function applyLayout(layout: LayoutTokens): void {
+  const root = document.documentElement;
+  const sp = densitySpacing[layout.density];
+  root.style.setProperty('--spacing-xs', sp.xs);
+  root.style.setProperty('--spacing-sm', sp.sm);
+  root.style.setProperty('--spacing-md', sp.md);
+  root.style.setProperty('--spacing-lg', sp.lg);
+  root.style.setProperty('--spacing-xl', sp.xl);
+  const r = radiusMap[layout.borderRadius];
+  root.style.setProperty('--radius-sm', r.sm);
+  root.style.setProperty('--radius-md', r.md);
+  root.style.setProperty('--radius-lg', r.lg);
+  root.style.setProperty('--font-scale', String(layout.fontScale));
+  root.style.fontSize = `${layout.fontScale}rem`;
+  root.setAttribute('data-density', layout.density);
 }
