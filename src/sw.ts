@@ -60,7 +60,7 @@ self.addEventListener('push', (event: PushEvent) => {
 });
 
 // Open app on notification click
-self.addEventListener('notificationclick', (event: NotificationClickEvent) => {
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close();
   const url = (event.notification.data as { url?: string })?.url ?? '/';
   event.waitUntil(

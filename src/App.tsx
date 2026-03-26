@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { ConnectivityStatus, OfflineBanner } from './components/ConnectivityStatus';
 import { TransactionList } from './components/TransactionItem';
 import { AdvancedBalanceDisplay } from './components/AdvancedBalanceDisplay';
+import { BalanceList } from './components/BalanceDisplay';
 import { TransactionFormBuilder } from './components/TransactionFormBuilder';
 import { TokenTransferWizard } from './components/TokenTransferWizard';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
+import { EscrowManagement } from './components/EscrowManagement';
 import { ResponsiveNav, Breadcrumb, ContextualNav, Dashboard, LiveDataFeed, NotificationCenter, NotificationPreferences, AlertRules } from './components';
 import { NavItem } from './services/navigation/types';
 import { DataPoint } from './services/visualization/types';
@@ -37,7 +39,7 @@ function App(): JSX.Element {
     resolveConflict,
   } = useTransactionQueue();
 
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows' | 'table'>('balances');
+  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows' | 'table' | 'analytics' | 'transfer' | 'build' | 'search' | 'dashboard' | 'settings' | 'escrow'>('balances');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [builderMode, setBuilderMode] = useState(false);
 
@@ -51,11 +53,6 @@ function App(): JSX.Element {
   ];
 
   // Demo function to simulate transaction submission
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard' | 'settings'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search' | 'dashboard'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'workflows'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'pending' | 'history' | 'search'>('balances');
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState([{ label: 'Home' }]);
   const [chartData, setChartData] = useState<DataPoint[]>([]);
 
@@ -124,11 +121,6 @@ function App(): JSX.Element {
       },
     },
   ];
-  const [activeTab, setActiveTab] = useState<'balances' | 'analytics' | 'transfer' | 'build' | 'pending' | 'history'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'transfer' | 'build' | 'pending' | 'history'>('balances');
-  const [activeTab, setActiveTab] = useState<'balances' | 'build' | 'pending' | 'history'>('balances');
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
-  const [builderMode, setBuilderMode] = useState(false);
 
   const handleSubmitTransaction = async (): Promise<void> => {
     setIsDemoLoading(true);
@@ -257,47 +249,20 @@ function App(): JSX.Element {
                   '+ Queue Transfer (Demo)'
                 )}
               </button>
-      {/* Main Content */}
-      <main className="main-content container">
-        {builderMode ? (
-          <DashboardBuilder renderComponent={renderComponent} />
-        ) : (
-        <>
-        {/* Demo Section - Create Transaction */}
-        <section className="card mb-lg">
-          <div className="card-header">
-            <span className="card-title">Quick Actions</span>
-          </div>
-          
-          <div className="flex gap-md items-center">
-            <button
-              onClick={handleSubmitTransaction}
-              disabled={isDemoLoading}
-              className="btn btn-primary"
-            >
-              {isDemoLoading ? (
-                <>
-                  <span className="spinner" style={{ width: '16px', height: '16px' }} />
-                  Creating...
-                </>
-              ) : (
-                '＋ Queue Transfer (Demo)'
-              )}
-            </button>
-            
-            <button
-              onClick={syncNow}
-              disabled={!isOnline || syncStatus.isSyncing}
-              className="btn btn-secondary"
-            >
-              {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
-            </button>
-            
-            <span className="text-muted" style={{ marginLeft: 'auto' }}>
-              {pendingTransactions.length} pending • {syncedTransactions.length} synced
-            </span>
-          </div>
-        </section>
+              
+              <button
+                onClick={syncNow}
+                disabled={!isOnline || syncStatus.isSyncing}
+                className="btn btn-secondary"
+              >
+                {syncStatus.isSyncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+              
+              <span className="text-muted" style={{ marginLeft: 'auto' }}>
+                {pendingTransactions.length} pending • {syncedTransactions.length} synced
+              </span>
+            </div>
+          </section>
 
         {/* Tab Navigation */}
         <div className="flex gap-md mb-lg" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>
@@ -356,6 +321,13 @@ function App(): JSX.Element {
             style={{ backgroundColor: activeTab === 'table' ? 'var(--color-highlight)' : 'transparent' }}
           >
             📋 Table View
+          </button>
+          <button
+            onClick={() => setActiveTab('escrow')}
+            className={activeTab === 'escrow' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'escrow' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            🔐 Escrow
           </button>
         </div>
 
@@ -447,6 +419,8 @@ function App(): JSX.Element {
                 )}
               />
             )}
+
+            {activeTab === 'escrow' && <EscrowManagement />}
           </div>
 
           {/* Sidebar */}
@@ -471,83 +445,11 @@ function App(): JSX.Element {
                 {pendingTransactions.length} pending • {syncedTransactions.length} synced
               </span>
             </div>
-          </section>
-
-          {activeTab === 'balances' && (
-            <>
-              <h2 className="mb-md">Token Balances</h2>
-              {isOnline ? (
-                <p className="text-muted mb-md">You're online. Balances are fetched from the network.</p>
-              ) : (
-                <p className="text-warning mb-md">You're offline. Showing cached balances.</p>
-              )}
-              <BalanceList 
-                balances={balances}
-                emptyMessage="No cached balances."
-              />
-            </>
-          )}
-
-          {activeTab === 'pending' && (
-            <>
-              <h2 className="mb-md">Pending Transactions</h2>
-              {!isOnline && (
-                <p className="text-warning mb-md">You're offline. Transactions will sync when connection restores.</p>
-              )}
-              <TransactionList
-                transactions={pendingTransactions}
-                onRetry={retryTransaction}
-                onDelete={deleteTransaction}
-                onResolveConflict={resolveConflict}
-                emptyMessage="No pending transactions."
-              />
-            </>
-          )}
-
-          {activeTab === 'history' && (
-            <>
-              <h2 className="mb-md">Synced Transactions</h2>
-              <TransactionList
-                transactions={syncedTransactions}
-                emptyMessage="No synced transactions yet."
-              />
-            </>
-          )}
-
-          {activeTab === 'search' && (
-            <SearchPage
-              transactions={[...pendingTransactions, ...syncedTransactions]}
-              balances={balances}
-              escrows={escrows}
-            />
-          )}
-
-          {activeTab === 'dashboard' && (
-            <>
-              <h2 className="mb-md">Real-Time Dashboard</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', marginBottom: '16px' }}>
-                <Dashboard />
-                <LiveDataFeed onDataUpdate={(data) => setChartData([...chartData, data])} />
-              </div>
-            </>
-          )}
-
-          {activeTab === 'settings' && (
-            <>
-              <h2 className="mb-md">Settings</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <NotificationPreferences userId="user-1" />
-                <AlertRules />
-              </div>
-            </>
-          )}
-        </main>
-      </div>
           </div>
         </div>
-        </>
-        )}
+
       </main>
+      </div>
 
       <TutorialOverlay />
     </div>

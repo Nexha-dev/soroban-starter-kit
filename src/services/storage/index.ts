@@ -265,7 +265,7 @@ class StorageService {
       data,
       timestamp: now,
       expiresAt: now + ttlSeconds * 1000,
-    });
+    } as any);
   }
 
   /**

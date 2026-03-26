@@ -197,8 +197,8 @@ class SecurityService {
     }
     const key = await crypto.subtle.importKey(
       'raw',
-      keyBytes,
-      { name: 'HMAC', hash: 'SHA-1' },
+      keyBytes.buffer as ArrayBuffer,
+      { name: "HMAC", hash: "SHA-1" },
       false,
       ['sign'],
     );

@@ -1,7 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, Address, Env, Symbol,
+    contract, contractimpl, contracttype, contracterror, token, Address, Env, Symbol,
 };
  /// script
 /// Escrow contract for secure two-party transactions
@@ -29,7 +29,7 @@ pub enum DataKey {
 }
 
 #[contracttype]
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum EscrowState {
     Created = 0,
     Funded = 1,
@@ -40,7 +40,8 @@ pub enum EscrowState {
 }
 
 /// Custom errors for the escrow contract
-#[contracttype]
+#[contracterror]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum EscrowError {
     NotAuthorized = 1,
     InvalidState = 2,

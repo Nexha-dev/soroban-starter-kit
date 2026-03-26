@@ -15,27 +15,25 @@ describe('AccessibilityManager', () => {
   describe('Settings Management', () => {
     it('should update settings', () => {
       accessibilityManager.updateSettings({ highContrast: true });
-      const settings = accessibilityManager.getSettings();
-      expect(settings.highContrast).toBe(true);
+      expect(accessibilityManager.getSettings().highContrast).toBe(true);
     });
 
-    it('should notify listeners on settings change', (done) => {
-      accessibilityManager.subscribe((settings) => {
+    it('should notify listeners on settings change', () => new Promise<void>((resolve) => {
+      const unsub = accessibilityManager.subscribe((settings) => {
         expect(settings.highContrast).toBe(true);
-        done();
+        unsub();
+        resolve();
       });
       accessibilityManager.updateSettings({ highContrast: true });
-    });
+    }));
 
     it('should support multiple listeners', () => {
       let count1 = 0;
       let count2 = 0;
-
-      accessibilityManager.subscribe(() => count1++);
-      accessibilityManager.subscribe(() => count2++);
-
+      const u1 = accessibilityManager.subscribe(() => count1++);
+      const u2 = accessibilityManager.subscribe(() => count2++);
       accessibilityManager.updateSettings({ fontSize: 'large' });
-
+      u1(); u2();
       expect(count1).toBe(1);
       expect(count2).toBe(1);
     });
@@ -58,7 +56,7 @@ describe('AccessibilityManager', () => {
 
   describe('Screen Reader Support', () => {
     it('should announce messages', () => {
-      const spy = jest.spyOn(document.body, 'appendChild');
+      const spy = vi.spyOn(document.body, 'appendChild');
       accessibilityManager.announce('Test message');
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();

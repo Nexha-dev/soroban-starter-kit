@@ -48,7 +48,7 @@ export function SearchPage({ transactions, balances, escrows }: SearchPageProps)
     // Record analytics
     await searchManager.recordAnalytics(
       query.text || '',
-      searchQuery.filters,
+      searchQuery.filters as unknown as Record<string, unknown>,
       result.items.length,
       result.executionTime
     );

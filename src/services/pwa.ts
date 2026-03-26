@@ -64,7 +64,7 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   try {
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
     });
     trackEvent('push_subscribed');
     return subscription;
@@ -147,7 +147,7 @@ export function trackWebVitals(): void {
   let clsValue = 0;
   new PerformanceObserver(list => {
     for (const entry of list.getEntries()) {
-      const e = entry as LayoutShift;
+      const e = entry as any;
       if (!e.hadRecentInput) clsValue += e.value;
     }
     trackEvent('web_vital_cls', { value: clsValue.toFixed(4) });

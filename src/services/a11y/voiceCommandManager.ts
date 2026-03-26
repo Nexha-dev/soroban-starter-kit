@@ -17,7 +17,7 @@ export interface VoiceConfig {
 }
 
 class VoiceCommandManager {
-  private recognition: SpeechRecognition | null = null;
+  private recognition: any | null = null;
   private commands: Map<string, VoiceCommand> = new Map();
   private config: VoiceConfig = {
     enabled: false,
@@ -77,7 +77,7 @@ class VoiceCommandManager {
   /**
    * Handle speech recognition result
    */
-  private handleResult(event: SpeechRecognitionEvent): void {
+  private handleResult(event: any): void {
     let transcript = '';
 
     for (let i = event.resultIndex; i < event.results.length; i++) {
