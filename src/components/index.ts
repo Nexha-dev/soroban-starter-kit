@@ -30,6 +30,7 @@ export { ContractInteraction } from './ContractInteraction';
 export { PerformanceDashboard } from './PerformanceDashboard';
 export { AccessibilityDashboard } from './AccessibilityDashboard';
 export { ComponentDocs } from './ComponentDocs';
+export { ErrorDashboard } from './ErrorDashboard';
 export { ConnectivityStatus, OfflineBanner } from "./ConnectivityStatus";
 export { TransactionItem, TransactionList } from "./TransactionItem";
 export { BalanceDisplay, BalanceList } from "./BalanceDisplay";

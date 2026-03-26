@@ -29,6 +29,7 @@ const WorkflowLauncher = lazy(() => import('./workflow').then(m => ({ default: m
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard').then(m => ({ default: m.PerformanceDashboard })));
 const AccessibilityDashboard = lazy(() => import('./components/AccessibilityDashboard').then(m => ({ default: m.AccessibilityDashboard })));
 const ComponentDocs = lazy(() => import('./components/ComponentDocs').then(m => ({ default: m.ComponentDocs })));
+const ErrorDashboard = lazy(() => import('./components/ErrorDashboard').then(m => ({ default: m.ErrorDashboard })));
 
 const LazyFallback = () => <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading…</div>;
 
@@ -157,6 +158,15 @@ function App(): JSX.Element {
       onClick: () => {
         setActiveTab('docs' as any);
         setBreadcrumbs([{ label: 'Home' }, { label: 'Component Docs' }]);
+      },
+    },
+    {
+      id: 'errors',
+      label: 'Error Tracking',
+      icon: '🐛',
+      onClick: () => {
+        setActiveTab('error-tracking' as any);
+        setBreadcrumbs([{ label: 'Home' }, { label: 'Error Tracking' }]);
       },
     },
   ];
@@ -611,6 +621,12 @@ function App(): JSX.Element {
           {(activeTab as string) === 'docs' && (
             <Suspense fallback={<LazyFallback />}>
               <ComponentDocs />
+            </Suspense>
+          )}
+
+          {(activeTab as string) === 'error-tracking' && (
+            <Suspense fallback={<LazyFallback />}>
+              <ErrorDashboard />
             </Suspense>
           )}
         </main>
