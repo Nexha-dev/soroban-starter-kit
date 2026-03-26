@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { installFetchLogger } from './services/logger/middleware';
+
+installFetchLogger();
 import { ConnectivityProvider } from './context/ConnectivityContext';
 import { StorageProvider } from './context/StorageContext';
 import { TransactionQueueProvider } from './context/TransactionQueueContext';
