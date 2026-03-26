@@ -1,3 +1,7 @@
+// Test Reporting
+export { testReportingService } from './testReporting';
+export type { TestResult, TestRun, TestStatus, QualityGate, TestAnalytics } from './testReporting';
+
 // State Management Services
 export {
   stateManager,
@@ -57,5 +61,11 @@ export {
 export { logger, type LogLevel, type LogEntry, type StellarLogData } from './logger';
 export { installFetchLogger } from './logger/middleware';
 // Security Service
+export { securityService, encryptData, decryptData } from './security';
+export type { SecuritySession, AuditLogEntry, SecurityAlert, SecurityConfig, SecurityState, AuthMethod, AlertSeverity } from './security';
+
+// Logging Service
+export { loggingService } from './logging';
+export type { LogEntry, ParsedLog, LogQuery, LogSearchResult, AnomalyAlert, RetentionPolicy, LogStats, LogLevel, LogSource } from './logging';
 export { securityService, encryptData, decryptData } from "./security";
 export type { SecuritySession, AuditLogEntry, SecurityAlert, SecurityConfig, SecurityState, AuthMethod, AlertSeverity } from "./security";

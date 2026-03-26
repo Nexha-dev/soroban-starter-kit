@@ -1,8 +1,24 @@
+node_modules
+docs-report.json/
+# ── Node ──────────────────────────────────────────────────────────────────────
 node_modules/
 dist/
 .DS_Store
 *.log
+
+# ── Environment ───────────────────────────────────────────────────────────────
 .env
+.env.local
+.env.*.local
+
+# ── Rust / Cargo ──────────────────────────────────────────────────────────────
+target/
+Cargo.lock
+
+# ── Coverage / Reports ────────────────────────────────────────────────────────
+coverage/
+lint-report.json
+audit-report.json
 /node_modules
 /dist
 /target
