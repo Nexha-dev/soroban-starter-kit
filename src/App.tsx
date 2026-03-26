@@ -4,6 +4,11 @@ import { ConnectivityStatus, OfflineBanner } from './components/ConnectivityStat
 import { TransactionList } from './components/TransactionItem';
 import { TransactionHistory } from './components/TransactionHistory';
 import { AdvancedBalanceDisplay } from './components/AdvancedBalanceDisplay';
+import { TransactionFormBuilder } from './components/TransactionFormBuilder';
+import { TokenTransferWizard } from './components/TokenTransferWizard';
+import { PortfolioDashboard } from './components/PortfolioDashboard';
+import { PortfolioAnalytics } from './components/PortfolioAnalytics';
+import { AdminPanel } from './components/AdminPanel';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
 import {
@@ -508,6 +513,72 @@ function App(): JSX.Element {
                 </>
               )}
 
+        {/* Tab Navigation */}
+        <div className="flex gap-md mb-lg" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>
+          <button
+            onClick={() => setActiveTab('balances')}
+            className={activeTab === 'balances' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'balances' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            📊 Cached Balances
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={activeTab === 'analytics' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'analytics' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            📈 Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('admin' as any)}
+            className={(activeTab as string) === 'admin' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: (activeTab as string) === 'admin' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            🛡 Admin
+          </button>
+          <button
+            onClick={() => setActiveTab('transfer')}
+            className={activeTab === 'transfer' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'transfer' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            💸 Transfer
+          </button>
+          <button
+            onClick={() => setActiveTab('build')}
+            className={activeTab === 'build' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'build' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            🔨 Build Transaction
+          </button>
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={activeTab === 'pending' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'pending' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            ⏳ Pending ({pendingTransactions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={activeTab === 'history' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'history' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            ✓ Synced History ({syncedTransactions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('workflows')}
+            className={activeTab === 'workflows' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'workflows' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            🔀 Workflows
+          </button>
+          <button
+            onClick={() => setActiveTab('table')}
+            className={activeTab === 'table' ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ backgroundColor: activeTab === 'table' ? 'var(--color-highlight)' : 'transparent' }}
+          >
+            📋 Table View
+          </button>
+        </div>
               {activeTab === 'analytics' && <PortfolioDashboard />}
 
               {activeTab === 'transfer' && <TokenTransferWizard />}
@@ -542,6 +613,11 @@ function App(): JSX.Element {
                 </>
               )}
             {activeTab === 'analytics' && (
+              <PortfolioAnalytics />
+            )}
+
+            {(activeTab as string) === 'admin' && (
+              <AdminPanel />
               <Suspense fallback={<LazyFallback />}>
                 <PortfolioDashboard />
               </Suspense>
