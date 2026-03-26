@@ -68,14 +68,14 @@ describe('ErrorHandler', () => {
   });
 
   describe('Error Subscriptions', () => {
-    it('should notify listeners', (done) => {
-      errorHandler.subscribe((error) => {
+    it('should notify listeners', () => new Promise<void>(resolve => {
+      const unsub = errorHandler.subscribe((error) => {
         expect(error.message).toBe('Test error');
-        done();
+        unsub();
+        resolve();
       });
-
       errorHandler.handleError('Test error');
-    });
+    }));
   });
 });
 

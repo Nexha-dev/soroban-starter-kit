@@ -1,0 +1,41 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app
+      - /app/node_modules          # keep container node_modules isolated
+    env_file: ../.env
+    depends_on:
+      - stellar-node
+
+  contracts:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.contracts
+    volumes:
+      - ../soroban-starter-kit:/contracts
+      - cargo-cache:/usr/local/cargo/registry
+    env_file: ../.env
+
+  # Local Stellar / Soroban node (stellar/quickstart)
+  stellar-node:
+    image: stellar/quickstart:latest
+    command: --local --enable-soroban-rpc
+    ports:
+      - "${LOCAL_RPC_PORT:-8000}:8000"
+      - "${LOCAL_HORIZON_PORT:-8001}:8001"
+    environment:
+      - ENABLE_SOROBAN_RPC=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cargo-cache:

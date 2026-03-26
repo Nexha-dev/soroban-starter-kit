@@ -1,0 +1,49 @@
+# Infrastructure Compliance Policy
+# Evaluated by scripts/infra.sh compliance and the IaC CI workflow.
+# Format: YAML — each rule has an id, description, severity, and check.
+
+version: "1.0"
+
+rules:
+  - id: TAG001
+    description: "All resources must have Project, Environment, and ManagedBy tags"
+    severity: error
+    required_tags: [Project, Environment, ManagedBy]
+
+  - id: ENC001
+    description: "S3 buckets must block all public access"
+    severity: error
+    resource_type: aws_s3_bucket_public_access_block
+    required_fields:
+      block_public_acls: true
+      block_public_policy: true
+      restrict_public_buckets: true
+
+  - id: TLS001
+    description: "CloudFront distributions must redirect HTTP to HTTPS"
+    severity: error
+    resource_type: aws_cloudfront_distribution
+    required_fields:
+      viewer_protocol_policy: redirect-to-https
+
+  - id: COST001
+    description: "A budget alert must be defined for every environment"
+    severity: warning
+    resource_type: aws_budgets_budget
+    min_count: 1
+
+  - id: MON001
+    description: "A CloudWatch alarm must exist for error rate monitoring"
+    severity: warning
+    resource_type: aws_cloudwatch_metric_alarm
+    min_count: 1
+
+  - id: STATE001
+    description: "Remote state backend must be configured (not local)"
+    severity: error
+    check: terraform_backend != "local"
+
+  - id: VER001
+    description: "Terraform version must be >= 1.6"
+    severity: error
+    check: terraform_version >= "1.6"

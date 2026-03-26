@@ -1,0 +1,15 @@
+/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/deps/stellar_strkey-ec12f4c0bdf0940d.d: /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/lib.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/convert.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/crc.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/ed25519.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/error.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/strkey.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/typ.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/version.rs
+
+/home/uche-ofatu/Downloads/soroban-starter-kit/soroban-starter-kit/target/debug/deps/libstellar_strkey-ec12f4c0bdf0940d.rmeta: /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/lib.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/convert.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/crc.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/ed25519.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/error.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/strkey.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/typ.rs /home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/version.rs
+
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/lib.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/convert.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/crc.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/ed25519.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/error.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/strkey.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/typ.rs:
+/home/uche-ofatu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stellar-strkey-0.0.8/src/version.rs:
+
+# env-dep:CARGO_PKG_VERSION=0.0.8
+# env-dep:GIT_REVISION=79ede59c97ed80090b9af63151c9f9a15260492d

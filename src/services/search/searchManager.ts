@@ -133,6 +133,32 @@ class SearchManager {
       .slice(0, limit);
   }
 
+  async getRecentHistory(limit = 10): Promise<SearchAnalytics[]> {
+    if (!this.db) await this.init();
+    const all = await this.db!.getAll('analytics');
+    return all
+      .filter(a => a.query.trim())
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limit);
+  }
+
+  async getTopQueries(limit = 5): Promise<{ query: string; count: number; avgTime: number }[]> {
+    if (!this.db) await this.init();
+    const all = await this.db!.getAll('analytics');
+    const map = new Map<string, { count: number; totalTime: number }>();
+    for (const a of all) {
+      if (!a.query.trim()) continue;
+      const entry = map.get(a.query) ?? { count: 0, totalTime: 0 };
+      entry.count++;
+      entry.totalTime += a.executionTime;
+      map.set(a.query, entry);
+    }
+    return [...map.entries()]
+      .map(([query, { count, totalTime }]) => ({ query, count, avgTime: totalTime / count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
   async getAnalytics(limit: number = 100): Promise<SearchAnalytics[]> {
     if (!this.db) await this.init();
 

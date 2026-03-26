@@ -3,7 +3,7 @@ import type { CachedTransaction, TransactionType, TransactionStatus } from '../s
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type ViewMode = 'timeline' | 'list';
+type ViewMode = 'timeline' | 'list' | 'analytics';
 type GroupBy = 'none' | 'date' | 'type' | 'status';
 type SortField = 'createdAt' | 'type' | 'status';
 type SortDir = 'asc' | 'desc';
@@ -93,6 +93,10 @@ export function TransactionHistory({ transactions }: Props): JSX.Element {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<CachedTransaction | null>(null);
+  // tags: txId → string[]
+  const [tags, setTags] = useState<Record<string, string[]>>(() => {
+    try { return JSON.parse(localStorage.getItem('fidelis-tx-tags') ?? '{}'); } catch { return {}; }
+  });
   const [filters, setFilters] = useState<Filters>({
     search: '',
     types: [],
@@ -100,6 +104,21 @@ export function TransactionHistory({ transactions }: Props): JSX.Element {
     dateFrom: '',
     dateTo: '',
   });
+
+  const saveTags = useCallback((next: Record<string, string[]>) => {
+    setTags(next);
+    localStorage.setItem('fidelis-tx-tags', JSON.stringify(next));
+  }, []);
+
+  const addTag = useCallback((txId: string, tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    saveTags({ ...tags, [txId]: [...new Set([...(tags[txId] ?? []), trimmed])] });
+  }, [tags, saveTags]);
+
+  const removeTag = useCallback((txId: string, tag: string) => {
+    saveTags({ ...tags, [txId]: (tags[txId] ?? []).filter(t => t !== tag) });
+  }, [tags, saveTags]);
 
   // ── Filtering + sorting ──────────────────────────────────────────────────
 
@@ -242,11 +261,11 @@ export function TransactionHistory({ transactions }: Props): JSX.Element {
 
         {/* View toggle */}
         <div role="group" aria-label="View mode" style={{ display: 'flex', gap: 4 }}>
-          {(['timeline', 'list'] as ViewMode[]).map((v) => (
+          {(['timeline', 'list', 'analytics'] as ViewMode[]).map((v) => (
             <button key={v} onClick={() => setView(v)}
               aria-pressed={view === v}
               style={{ ...btnBase, background: view === v ? '#6366f1' : '#e5e7eb', color: view === v ? '#fff' : '#111' }}>
-              {v === 'timeline' ? '⏱ Timeline' : '☰ List'}
+              {v === 'timeline' ? '⏱ Timeline' : v === 'list' ? '☰ List' : '📊 Analytics'}
             </button>
           ))}
         </div>
@@ -280,7 +299,9 @@ export function TransactionHistory({ transactions }: Props): JSX.Element {
       </p>
 
       {/* Content */}
-      {filtered.length === 0 ? (
+      {view === 'analytics' ? (
+        <AnalyticsView transactions={transactions} filtered={filtered} />
+      ) : filtered.length === 0 ? (
         <p style={{ textAlign: 'center', color: '#9ca3af', padding: 32 }}>No transactions match your filters.</p>
       ) : (
         grouped.map(([group, txs]) => (
@@ -300,7 +321,7 @@ export function TransactionHistory({ transactions }: Props): JSX.Element {
 
       {/* Detail panel */}
       {selected && (
-        <DetailPanel tx={selected} onClose={() => setSelected(null)} />
+        <DetailPanel tx={selected} onClose={() => setSelected(null)} tags={tags[selected.id] ?? []} onAddTag={(t) => addTag(selected.id, t)} onRemoveTag={(t) => removeTag(selected.id, t)} />
       )}
     </div>
   );
@@ -424,7 +445,43 @@ function TxCard({ tx, onSelect, isSelected }: { tx: CachedTransaction; onSelect:
 
 // ── Detail panel ─────────────────────────────────────────────────────────────
 
-function DetailPanel({ tx, onClose }: { tx: CachedTransaction; onClose: () => void }) {
+function DetailPanel({ tx, onClose, tags, onAddTag, onRemoveTag }: {
+  tx: CachedTransaction;
+  onClose: () => void;
+  tags: string[];
+  onAddTag: (tag: string) => void;
+  onRemoveTag: (tag: string) => void;
+}) {
+  const [tagInput, setTagInput] = useState('');
+
+  const downloadReceipt = () => {
+    const lines = [
+      '=== TRANSACTION RECEIPT ===',
+      `ID:       ${tx.id}`,
+      `Type:     ${tx.type}`,
+      `Status:   ${tx.status}`,
+      `Contract: ${tx.contractId}`,
+      `Method:   ${tx.method}`,
+      `Created:  ${fmtDate(tx.createdAt)}`,
+      `Synced:   ${tx.syncedAt ? fmtDate(tx.syncedAt) : '—'}`,
+      `Retries:  ${tx.retryCount}`,
+      tx.error ? `Error:    ${tx.error}` : '',
+      '',
+      'Parameters:',
+      JSON.stringify(tx.params, null, 2),
+      '',
+      `Tags: ${tags.join(', ') || 'none'}`,
+      '===========================',
+    ].filter(l => l !== undefined);
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${tx.id.slice(0, 8)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div role="dialog" aria-label="Transaction details"
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000 }}
@@ -432,7 +489,10 @@ function DetailPanel({ tx, onClose }: { tx: CachedTransaction; onClose: () => vo
       <div style={{ background: '#fff', borderRadius: '16px 16px 0 0', padding: 24, width: '100%', maxWidth: 640, maxHeight: '80vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
           <h3 style={{ margin: 0 }}>{TYPE_ICON[tx.type]} {tx.type}</h3>
-          <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={downloadReceipt} style={{ ...btnBase, fontSize: 12 }} title="Download receipt">🧾 Receipt</button>
+            <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+          </div>
         </div>
 
         {/* Flow diagram */}
@@ -456,6 +516,30 @@ function DetailPanel({ tx, onClose }: { tx: CachedTransaction; onClose: () => vo
             </div>
           ))}
         </dl>
+
+        {/* Tags */}
+        <div style={{ marginTop: 16 }}>
+          <h4 style={{ fontSize: 13, marginBottom: 8 }}>Tags</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {tags.map(tag => (
+              <span key={tag} style={{ ...chipBase, background: '#dbeafe', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                {tag}
+                <button onClick={() => onRemoveTag(tag)} aria-label={`Remove tag ${tag}`} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, color: '#1d4ed8' }}>✕</button>
+              </span>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { onAddTag(tagInput); setTagInput(''); } }}
+              placeholder="Add tag…"
+              aria-label="New tag"
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            <button style={btnBase} onClick={() => { onAddTag(tagInput); setTagInput(''); }}>Add</button>
+          </div>
+        </div>
 
         {/* Params */}
         {Object.keys(tx.params).length > 0 && (
@@ -501,6 +585,131 @@ function FlowDiagram({ tx }: { tx: CachedTransaction }) {
           )}
         </React.Fragment>
       ))}
+    </div>
+  );
+}
+
+// ── Analytics view ────────────────────────────────────────────────────────────
+
+function AnalyticsView({ transactions, filtered }: { transactions: CachedTransaction[]; filtered: CachedTransaction[] }) {
+  // Volume over last 14 days
+  const volumeData = useMemo(() => {
+    const days: { label: string; count: number }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const end = start + 86_400_000;
+      days.push({ label, count: transactions.filter(t => t.createdAt >= start && t.createdAt < end).length });
+    }
+    return days;
+  }, [transactions]);
+
+  const maxVol = Math.max(...volumeData.map(d => d.count), 1);
+
+  // Type breakdown
+  const typeBreakdown = useMemo(() =>
+    ALL_TYPES.map(t => ({ type: t, count: transactions.filter(tx => tx.type === t).length }))
+      .filter(d => d.count > 0)
+      .sort((a, b) => b.count - a.count),
+    [transactions]);
+
+  const maxType = Math.max(...typeBreakdown.map(d => d.count), 1);
+
+  // Portfolio insights
+  const insights = useMemo(() => {
+    const total = transactions.length;
+    const synced = transactions.filter(t => t.status === 'synced').length;
+    const failed = transactions.filter(t => t.status === 'failed').length;
+    const avgRetries = total ? (transactions.reduce((s, t) => s + t.retryCount, 0) / total).toFixed(1) : '0';
+    const byDay = new Map<string, number>();
+    transactions.forEach(t => {
+      const d = fmtDay(t.createdAt);
+      byDay.set(d, (byDay.get(d) ?? 0) + 1);
+    });
+    const busiestDay = [...byDay.entries()].sort((a, b) => b[1] - a[1])[0];
+    return { total, synced, failed, successRate: total ? ((synced / total) * 100).toFixed(1) : '0', avgRetries, busiestDay };
+  }, [transactions]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Portfolio insights */}
+      <section>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Portfolio Insights</h3>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Total Transactions', value: insights.total, color: '#6366f1' },
+            { label: 'Success Rate', value: `${insights.successRate}%`, color: '#22c55e' },
+            { label: 'Failed', value: insights.failed, color: '#ef4444' },
+            { label: 'Avg Retries', value: insights.avgRetries, color: '#f59e0b' },
+            { label: 'Busiest Day', value: insights.busiestDay ? `${insights.busiestDay[0]} (${insights.busiestDay[1]})` : '—', color: '#8b5cf6' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ padding: '12px 16px', borderRadius: 10, background: color + '12', border: `1px solid ${color}33`, minWidth: 140 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color }}>{value}</div>
+              <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Volume trend — SVG bar chart */}
+      <section>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+          Transaction Volume (Last 14 Days)
+        </h3>
+        <svg viewBox="0 0 560 120" style={{ width: '100%', maxWidth: 700, height: 120, display: 'block' }} role="img" aria-label="Transaction volume bar chart">
+          {volumeData.map((d, i) => {
+            const barH = maxVol > 0 ? (d.count / maxVol) * 80 : 0;
+            const x = i * 40 + 4;
+            return (
+              <g key={d.label}>
+                <rect x={x} y={100 - barH} width={32} height={barH} rx={3} fill="#6366f1" opacity={0.8} />
+                <text x={x + 16} y={115} textAnchor="middle" fontSize={8} fill="#9ca3af">{d.label.split(' ')[1]}</text>
+                {d.count > 0 && <text x={x + 16} y={96 - barH} textAnchor="middle" fontSize={9} fill="#6366f1">{d.count}</text>}
+              </g>
+            );
+          })}
+        </svg>
+      </section>
+
+      {/* Type breakdown — horizontal bars */}
+      <section>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+          By Transaction Type
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {typeBreakdown.map(({ type, count }) => (
+            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 120, fontSize: 12, color: '#374151' }}>{TYPE_ICON[type as TransactionType]} {type}</span>
+              <div style={{ flex: 1, background: '#f3f4f6', borderRadius: 4, height: 16, overflow: 'hidden' }}>
+                <div style={{ width: `${(count / maxType) * 100}%`, height: '100%', background: '#6366f1', borderRadius: 4, transition: 'width 0.3s' }} />
+              </div>
+              <span style={{ width: 28, fontSize: 12, fontWeight: 600, color: '#6366f1', textAlign: 'right' }}>{count}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Status breakdown */}
+      <section>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+          By Status
+        </h3>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {ALL_STATUSES.map(s => {
+            const count = transactions.filter(t => t.status === s).length;
+            if (!count) return null;
+            const pct = ((count / insights.total) * 100).toFixed(0);
+            return (
+              <div key={s} style={{ padding: '10px 14px', borderRadius: 8, background: STATUS_COLOR[s] + '18', border: `1px solid ${STATUS_COLOR[s]}44`, minWidth: 100 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: STATUS_COLOR[s] }}>{count}</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>{s} ({pct}%)</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

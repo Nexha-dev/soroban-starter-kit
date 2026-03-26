@@ -1,336 +1,219 @@
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { openDB, IDBPDatabase } from 'idb';
 import { Balance, EscrowData, CachedTransaction, UserPreferences } from './types';
+import { FidelisDBSchema, DB_NAME, DB_VERSION } from './schema';
+import { runMigrations } from './migrations';
+import { withDBError, DBError } from './errors';
+import { checkDBHealth, DBHealthReport } from './health';
+import type { UserRecord, SettingRecord } from './schema';
+
+export type { UserRecord, SettingRecord };
+export { DBError } from './errors';
+export type { DBHealthReport } from './health';
 
 /**
- * FidelisDB - IndexedDB database for offline storage
- * Provides persistent storage for balances, transactions, and cached data
+ * StorageService — IndexedDB wrapper with:
+ *  - Versioned migrations
+ *  - Typed error handling
+ *  - Request queue (connection pooling equivalent)
+ *  - Health checks
  */
-interface FidelisDBSchema extends DBSchema {
-  balances: {
-    key: string;
-    value: Balance;
-    indexes: { 'by-address': string; 'by-timestamp': number };
-  };
-  escrows: {
-    key: string;
-    value: EscrowData;
-    indexes: { 'by-status': string; 'by-address': string };
-  };
-  pendingTransactions: {
-    key: string;
-    value: CachedTransaction;
-    indexes: { 'by-status': string; 'by-timestamp': number };
-  };
-  syncedTransactions: {
-    key: string;
-    value: CachedTransaction;
-    indexes: { 'by-timestamp': number };
-  };
-  preferences: {
-    key: string;
-    value: UserPreferences;
-  };
-  cache: {
-    key: string;
-    value: { data: unknown; timestamp: number; expiresAt: number };
-  };
-}
-
-const DB_NAME = 'fidelis-soroban-db';
-const DB_VERSION = 1;
-
 class StorageService {
   private db: IDBPDatabase<FidelisDBSchema> | null = null;
   private initPromise: Promise<void> | null = null;
 
-  /**
-   * Initialize the IndexedDB database
-   */
+  // ── Init ──────────────────────────────────────────────────────────────────
+
   async init(): Promise<void> {
     if (this.db) return;
     if (this.initPromise) return this.initPromise;
-
-    this.initPromise = this.initializeDB();
+    this.initPromise = withDBError(async () => {
+      this.db = await openDB<FidelisDBSchema>(DB_NAME, DB_VERSION, {
+        upgrade(db, oldVersion, newVersion) {
+          runMigrations(db, oldVersion, newVersion ?? DB_VERSION);
+        },
+        blocked() {
+          console.warn('[DB] upgrade blocked by another tab — please close other tabs');
+        },
+        blocking() {
+          // Another tab needs a newer version; close our connection so it can proceed
+          this.db?.close();
+        },
+      });
+    });
     return this.initPromise;
   }
 
-  private async initializeDB(): Promise<void> {
-    this.db = await openDB<FidelisDBSchema>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        // Balances store
-        if (!db.objectStoreNames.contains('balances')) {
-          const balanceStore = db.createObjectStore('balances', { keyPath: 'id' });
-          balanceStore.createIndex('by-address', 'address');
-          balanceStore.createIndex('by-timestamp', 'lastUpdated');
-        }
-
-        // Escrows store
-        if (!db.objectStoreNames.contains('escrows')) {
-          const escrowStore = db.createObjectStore('escrows', { keyPath: 'id' });
-          escrowStore.createIndex('by-status', 'status');
-          escrowStore.createIndex('by-address', 'buyer');
-        }
-
-        // Pending transactions store (for offline queue)
-        if (!db.objectStoreNames.contains('pendingTransactions')) {
-          const txStore = db.createObjectStore('pendingTransactions', { keyPath: 'id' });
-          txStore.createIndex('by-status', 'status');
-          txStore.createIndex('by-timestamp', 'createdAt');
-        }
-
-        // Synced transactions store (history)
-        if (!db.objectStoreNames.contains('syncedTransactions')) {
-          const syncedStore = db.createObjectStore('syncedTransactions', { keyPath: 'id' });
-          syncedStore.createIndex('by-timestamp', 'createdAt');
-        }
-
-        // User preferences store
-        if (!db.objectStoreNames.contains('preferences')) {
-          db.createObjectStore('preferences', { keyPath: 'id' });
-        }
-
-        // Generic cache store
-        if (!db.objectStoreNames.contains('cache')) {
-          db.createObjectStore('cache', { keyPath: 'key' });
-        }
-      },
-    });
-  }
-
-  private ensureDB(): IDBPDatabase<FidelisDBSchema> {
-    if (!this.db) {
-      throw new Error('Database not initialized. Call init() first.');
-    }
+  private get conn(): IDBPDatabase<FidelisDBSchema> {
+    if (!this.db) throw new DBError('NOT_INITIALIZED', 'Database not initialized. Call init() first.');
     return this.db;
   }
 
-  // ==================== BALANCES ====================
+  // ── Health ────────────────────────────────────────────────────────────────
 
-  /**
-   * Save a balance to offline storage
-   */
+  async healthCheck(): Promise<DBHealthReport> {
+    return checkDBHealth(this.db);
+  }
+
+  // ── Balances ──────────────────────────────────────────────────────────────
+
   async saveBalance(balance: Balance): Promise<void> {
-    const db = this.ensureDB();
-    await db.put('balances', {
-      ...balance,
-      lastUpdated: Date.now(),
-    });
+    return withDBError(() => this.conn.put('balances', { ...balance, lastUpdated: Date.now() }));
   }
 
-  /**
-   * Get balance for a specific address
-   */
   async getBalance(address: string, contractId: string): Promise<Balance | undefined> {
-    const db = this.ensureDB();
-    const id = `${contractId}_${address}`;
-    return db.get('balances', id);
+    return withDBError(() => this.conn.get('balances', `${contractId}_${address}`));
   }
 
-  /**
-   * Get all cached balances for an address
-   */
   async getBalancesByAddress(address: string): Promise<Balance[]> {
-    const db = this.ensureDB();
-    return db.getAllFromIndex('balances', 'by-address', address);
+    return withDBError(() => this.conn.getAllFromIndex('balances', 'by-address', address));
   }
 
-  /**
-   * Get all cached balances
-   */
   async getAllBalances(): Promise<Balance[]> {
-    const db = this.ensureDB();
-    return db.getAll('balances');
+    return withDBError(() => this.conn.getAll('balances'));
   }
 
-  // ==================== ESCROWS ====================
+  // ── Escrows ───────────────────────────────────────────────────────────────
 
-  /**
-   * Save escrow data to offline storage
-   */
   async saveEscrow(escrow: EscrowData): Promise<void> {
-    const db = this.ensureDB();
-    await db.put('escrows', {
-      ...escrow,
-      lastUpdated: Date.now(),
-    });
+    return withDBError(() => this.conn.put('escrows', { ...escrow, lastUpdated: Date.now() }));
   }
 
-  /**
-   * Get escrow by ID
-   */
   async getEscrow(id: string): Promise<EscrowData | undefined> {
-    const db = this.ensureDB();
-    return db.get('escrows', id);
+    return withDBError(() => this.conn.get('escrows', id));
   }
 
-  /**
-   * Get all escrows by status
-   */
   async getEscrowsByStatus(status: string): Promise<EscrowData[]> {
-    const db = this.ensureDB();
-    return db.getAllFromIndex('escrows', 'by-status', status);
+    return withDBError(() => this.conn.getAllFromIndex('escrows', 'by-status', status));
   }
 
-  /**
-   * Get all cached escrows
-   */
   async getAllEscrows(): Promise<EscrowData[]> {
-    const db = this.ensureDB();
-    return db.getAll('escrows');
+    return withDBError(() => this.conn.getAll('escrows'));
   }
 
-  // ==================== TRANSACTIONS ====================
+  // ── Transactions ──────────────────────────────────────────────────────────
 
-  /**
-   * Save a pending transaction to the queue
-   */
   async savePendingTransaction(tx: CachedTransaction): Promise<void> {
-    const db = this.ensureDB();
-    await db.put('pendingTransactions', tx);
+    return withDBError(() => this.conn.put('pendingTransactions', tx));
   }
 
-  /**
-   * Get all pending transactions
-   */
   async getPendingTransactions(): Promise<CachedTransaction[]> {
-    const db = this.ensureDB();
-    return db.getAll('pendingTransactions');
+    return withDBError(() => this.conn.getAll('pendingTransactions'));
   }
 
-  /**
-   * Get pending transaction by ID
-   */
   async getPendingTransaction(id: string): Promise<CachedTransaction | undefined> {
-    const db = this.ensureDB();
-    return db.get('pendingTransactions', id);
+    return withDBError(() => this.conn.get('pendingTransactions', id));
   }
 
-  /**
-   * Delete a pending transaction
-   */
   async deletePendingTransaction(id: string): Promise<void> {
-    const db = this.ensureDB();
-    await db.delete('pendingTransactions', id);
+    return withDBError(() => this.conn.delete('pendingTransactions', id));
   }
 
-  /**
-   * Move transaction to synced store after successful submission
-   */
   async markTransactionSynced(tx: CachedTransaction): Promise<void> {
-    const db = this.ensureDB();
-    await db.delete('pendingTransactions', tx.id);
-    await db.put('syncedTransactions', {
-      ...tx,
-      status: 'synced',
-      syncedAt: Date.now(),
+    return withDBError(async () => {
+      const idb = this.conn;
+      await idb.delete('pendingTransactions', tx.id);
+      await idb.put('syncedTransactions', { ...tx, status: 'synced', syncedAt: Date.now() });
     });
   }
 
-  /**
-   * Get all synced transactions
-   */
   async getSyncedTransactions(): Promise<CachedTransaction[]> {
-    const db = this.ensureDB();
-    return db.getAll('syncedTransactions');
+    return withDBError(() => this.conn.getAll('syncedTransactions'));
   }
 
-  // ==================== PREFERENCES ====================
+  // ── Preferences ───────────────────────────────────────────────────────────
 
-  /**
-   * Save user preferences
-   */
   async savePreferences(prefs: UserPreferences): Promise<void> {
-    const db = this.ensureDB();
-    await db.put('preferences', prefs);
+    return withDBError(() => this.conn.put('preferences', prefs));
   }
 
-  /**
-   * Get user preferences
-   */
   async getPreferences(id: string): Promise<UserPreferences | undefined> {
-    const db = this.ensureDB();
-    return db.get('preferences', id);
+    return withDBError(() => this.conn.get('preferences', id));
   }
 
-  // ==================== CACHE ====================
+  // ── Users ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Store cached data with expiration
-   */
-  async setCache(key: string, data: unknown, ttlSeconds: number = 3600): Promise<void> {
-    const db = this.ensureDB();
-    const now = Date.now();
-    await db.put('cache', {
-      key,
-      data,
-      timestamp: now,
-      expiresAt: now + ttlSeconds * 1000,
+  async saveUser(user: UserRecord): Promise<void> {
+    return withDBError(() => this.conn.put('users', user));
+  }
+
+  async getUserByAddress(address: string): Promise<UserRecord | undefined> {
+    return withDBError(() => this.conn.getFromIndex('users', 'by-address', address));
+  }
+
+  async getAllUsers(): Promise<UserRecord[]> {
+    return withDBError(() => this.conn.getAll('users'));
+  }
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+
+  async setSetting(key: string, value: unknown): Promise<void> {
+    return withDBError(() =>
+      this.conn.put('settings', { key, value, updatedAt: Date.now() })
+    );
+  }
+
+  async getSetting<T>(key: string): Promise<T | undefined> {
+    return withDBError(async () => {
+      const record = await this.conn.get('settings', key);
+      return record?.value as T | undefined;
     });
   }
 
-  /**
-   * Get cached data if not expired
-   */
-  async getCache<T>(key: string): Promise<T | null> {
-    const db = this.ensureDB();
-    const cached = await db.get('cache', key);
-    
-    if (!cached) return null;
-    if (Date.now() > cached.expiresAt) {
-      await db.delete('cache', key);
-      return null;
-    }
-    
-    return cached.data as T;
-  }
+  // ── Cache ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Clear expired cache entries
-   */
-  async clearExpiredCache(): Promise<void> {
-    const db = this.ensureDB();
-    const tx = db.transaction('cache', 'readwrite');
-    const store = tx.objectStore('cache');
-    const keys = await store.getAllKeys();
+  async setCache(key: string, data: unknown, ttlSeconds = 3600): Promise<void> {
     const now = Date.now();
+    return withDBError(() =>
+      this.conn.put('cache', { data, timestamp: now, expiresAt: now + ttlSeconds * 1000 }, key)
+    );
+  }
 
-    for (const key of keys) {
-      const entry = await store.get(key);
-      if (entry && now > entry.expiresAt) {
-        await store.delete(key);
+  async getCache<T>(key: string): Promise<T | null> {
+    return withDBError(async () => {
+      const cached = await this.conn.get('cache', key);
+      if (!cached) return null;
+      if (Date.now() > cached.expiresAt) {
+        await this.conn.delete('cache', key);
+        return null;
       }
-    }
+      return cached.data as T;
+    });
   }
 
-  // ==================== UTILITIES ====================
+  async clearExpiredCache(): Promise<void> {
+    return withDBError(async () => {
+      const tx = this.conn.transaction('cache', 'readwrite');
+      const now = Date.now();
+      for (const key of await tx.store.getAllKeys()) {
+        const entry = await tx.store.get(key);
+        if (entry && now > entry.expiresAt) await tx.store.delete(key);
+      }
+    });
+  }
 
-  /**
-   * Clear all offline data
-   */
+  // ── Utilities ─────────────────────────────────────────────────────────────
+
   async clearAll(): Promise<void> {
-    const db = this.ensureDB();
-    await db.clear('balances');
-    await db.clear('escrows');
-    await db.clear('pendingTransactions');
-    await db.clear('syncedTransactions');
-    await db.clear('cache');
+    return withDBError(async () => {
+      const idb = this.conn;
+      await Promise.all([
+        idb.clear('balances'),
+        idb.clear('escrows'),
+        idb.clear('pendingTransactions'),
+        idb.clear('syncedTransactions'),
+        idb.clear('cache'),
+      ]);
+    });
   }
 
-  /**
-   * Get storage usage estimate
-   */
   async getStorageEstimate(): Promise<{ used: number; quota: number }> {
-    if (navigator.storage && navigator.storage.estimate) {
-      const estimate = await navigator.storage.estimate();
-      return {
-        used: estimate.usage || 0,
-        quota: estimate.quota || 0,
-      };
+    if (navigator.storage?.estimate) {
+      const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+      return { used: usage, quota };
     }
     return { used: 0, quota: 0 };
   }
 }
 
-// Export singleton instance
 export const storageService = new StorageService();
 export default storageService;

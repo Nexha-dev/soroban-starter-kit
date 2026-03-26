@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -38,6 +39,30 @@ export default defineConfig({
         ],
       },
     }),
+    // Bundle visualizer: generates stats.html when ANALYZE=true
+    ...(process.env.ANALYZE === 'true'
+      ? [visualizer({ open: true, filename: 'dist/stats.html', gzipSize: true, brotliSize: true })]
+      : []),
   ],
   server: { port: 3000 },
-});
+  build: {
+    sourcemap: process.env.ANALYZE === 'true',
+    rollupOptions: {
+      output: {
+        // Code splitting: vendor, stellar SDK, performance tools, and app chunks
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@stellar')) return 'vendor-stellar';
+            if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
+            return 'vendor';
+          }
+          // Lazy-loadable feature chunks
+          if (id.includes('src/services/performance')) return 'perf-tools';
+          if (id.includes('src/services/security')) return 'security';
+        },
+      },
+    },
+    // Performance budget: warn if chunk exceeds 500KB
+    chunkSizeWarningLimit: 500,
+  },
+}));
