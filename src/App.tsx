@@ -5,6 +5,7 @@ import { AdvancedBalanceDisplay } from './components/AdvancedBalanceDisplay';
 import { TransactionFormBuilder } from './components/TransactionFormBuilder';
 import { TokenTransferWizard } from './components/TokenTransferWizard';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
+import { PortfolioAnalytics } from './components/PortfolioAnalytics';
 import { SyncStatus, OfflineIndicator } from './components/SyncStatus';
 import { SearchPage } from './components/SearchPage';
 import { ResponsiveNav, Breadcrumb, ContextualNav, Dashboard, LiveDataFeed, NotificationCenter, NotificationPreferences, AlertRules } from './components';
@@ -385,7 +386,7 @@ function App(): JSX.Element {
             )}
 
             {activeTab === 'analytics' && (
-              <PortfolioDashboard />
+              <PortfolioAnalytics />
             )}
 
             {activeTab === 'transfer' && (
