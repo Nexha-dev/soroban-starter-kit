@@ -17,3 +17,7 @@ Cargo.lock
 coverage/
 lint-report.json
 audit-report.json
+/node_modules
+/dist
+/target
+target/
