@@ -153,7 +153,6 @@ class StorageService {
   // ── Settings ──────────────────────────────────────────────────────────────
 
   async setSetting(key: string, value: unknown): Promise<void> {
-    await withDBError(() =>
     return withDBError(() =>
       this.conn.put('settings', { key, value, updatedAt: Date.now() })
     );
@@ -170,7 +169,6 @@ class StorageService {
 
   async setCache(key: string, data: unknown, ttlSeconds = 3600): Promise<void> {
     const now = Date.now();
-    await withDBError(() =>
     return withDBError(() =>
       this.conn.put('cache', { data, timestamp: now, expiresAt: now + ttlSeconds * 1000 }, key)
     );
