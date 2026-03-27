@@ -77,12 +77,11 @@ class VoiceCommandManager {
   /**
    * Handle speech recognition result
    */
-  private handleResult(event: Event): void {
-    const e = event as any;
+  private handleResult(event: any): void {
     let transcript = '';
 
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
     }
 
     this.notifyListeners(transcript);

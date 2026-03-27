@@ -64,7 +64,7 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   try {
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as unknown as BufferSource,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
     });
     trackEvent('push_subscribed');
     return subscription;
@@ -147,39 +147,9 @@ export function trackWebVitals(): void {
   let clsValue = 0;
   new PerformanceObserver(list => {
     for (const entry of list.getEntries()) {
-      const e = entry as unknown as { hadRecentInput: boolean; value: number };
+      const e = entry as any;
       if (!e.hadRecentInput) clsValue += e.value;
     }
     trackEvent('web_vital_cls', { value: clsValue.toFixed(4) });
   }).observe({ type: 'layout-shift', buffered: true });
-}
-
-// --- Periodic Background Sync ---
-
-export async function registerPeriodicSync(tag: string, minIntervalMs: number): Promise<boolean> {
-  if (!('serviceWorker' in navigator)) return false;
-  const reg = await navigator.serviceWorker.ready;
-  const ps = (reg as ServiceWorkerRegistration & { periodicSync?: { register(tag: string, opts: { minInterval: number }): Promise<void>; getTags(): Promise<string[]> } }).periodicSync;
-  if (!ps) return false;
-  try {
-    const tags = await ps.getTags();
-    if (!tags.includes(tag)) await ps.register(tag, { minInterval: minIntervalMs });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// --- Cache Info ---
-
-export async function getCacheInfo(): Promise<{ name: string; entries: number }[]> {
-  if (!('caches' in window)) return [];
-  const names = await caches.keys();
-  return Promise.all(
-    names.map(async name => {
-      const cache = await caches.open(name);
-      const keys = await cache.keys();
-      return { name, entries: keys.length };
-    })
-  );
 }

@@ -126,7 +126,6 @@ class StateManager {
 
     this.invalidateCache();
     this.recordUpdate(startTime);
-    this.notifyListeners();
   }
 
   /**
@@ -167,18 +166,11 @@ class StateManager {
     delete this.state[type][id];
     const metaKeyMap = { balances: 'balanceIds', escrows: 'escrowIds', transactions: 'transactionIds' } as const;
     const metaKey = metaKeyMap[type];
-    this.state.metadata[metaKey] = this.state.metadata[metaKey].filter(itemId => itemId !== id);
+    this.state.metadata[metaKey] = this.state.metadata[metaKey].filter((itemId: string) => itemId !== id);
 
     this.invalidateCache();
     this.recordUpdate(startTime);
     this.notifyListeners();
-  }
-
-  /**
-   * Clear all listeners
-   */
-  clearListeners(): void {
-    this.listeners.clear();
   }
 
   /**

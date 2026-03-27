@@ -8,19 +8,15 @@ describe('StateValidator', () => {
   beforeEach(() => {
     stateValidator.clearHistory();
   });
+
   describe('State Validation', () => {
     it('should validate correct state', () => {
       const state = {
         balances: { 'b1': { id: 'b1', amount: '100' } },
         escrows: { 'e1': { id: 'e1', status: 'funded' } },
         transactions: { 'tx1': { id: 'tx1', status: 'pending' } },
-        metadata: {
-          balanceIds: ['b1'],
-          escrowIds: ['e1'],
-          transactionIds: ['tx1'],
-        },
+        metadata: { balanceIds: ['b1'], escrowIds: ['e1'], transactionIds: ['tx1'] },
       };
-
       const result = stateValidator.validate(state as any);
       expect(result.valid).toBe(true);
       expect(result.errors.length).toBe(0);
@@ -31,13 +27,8 @@ describe('StateValidator', () => {
         balances: { 'b1': { amount: '100' } },
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: ['b1'],
-          escrowIds: [],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: ['b1'], escrowIds: [], transactionIds: [] },
       };
-
       const result = stateValidator.validate(state as any);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.type === 'invalid_data')).toBe(true);
@@ -48,13 +39,8 @@ describe('StateValidator', () => {
         balances: { 'b1': { id: 'b1', amount: 'invalid' } },
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: ['b1'],
-          escrowIds: [],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: ['b1'], escrowIds: [], transactionIds: [] },
       };
-
       const result = stateValidator.validate(state as any);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.type === 'type_mismatch')).toBe(true);
@@ -65,13 +51,8 @@ describe('StateValidator', () => {
         balances: {},
         escrows: { 'e1': { id: 'e1', status: 'unknown' } },
         transactions: {},
-        metadata: {
-          balanceIds: [],
-          escrowIds: ['e1'],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: [], escrowIds: ['e1'], transactionIds: [] },
       };
-
       const result = stateValidator.validate(state as any);
       expect(result.warnings.length).toBeGreaterThan(0);
     });
@@ -81,13 +62,8 @@ describe('StateValidator', () => {
         balances: {},
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: ['b1'],
-          escrowIds: [],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: ['b1'], escrowIds: [], transactionIds: [] },
       };
-
       const result = stateValidator.validate(state as any);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.type === 'orphaned_item')).toBe(true);
@@ -100,13 +76,8 @@ describe('StateValidator', () => {
         balances: { 'b1': { id: 'b1' } },
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: ['b1', 'b2'],
-          escrowIds: ['e1'],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: ['b1', 'b2'], escrowIds: ['e1'], transactionIds: [] },
       };
-
       const repaired = stateValidator.repair(state as any);
       expect(repaired.metadata.balanceIds).toEqual(['b1']);
       expect(repaired.metadata.escrowIds).toEqual([]);
@@ -119,16 +90,10 @@ describe('StateValidator', () => {
         balances: {},
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: [],
-          escrowIds: [],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: [], escrowIds: [], transactionIds: [] },
       };
-
       stateValidator.validate(state as any);
       stateValidator.validate(state as any);
-
       const history = stateValidator.getHistory();
       expect(history.length).toBe(2);
     });
@@ -138,18 +103,11 @@ describe('StateValidator', () => {
         balances: {},
         escrows: {},
         transactions: {},
-        metadata: {
-          balanceIds: [],
-          escrowIds: [],
-          transactionIds: [],
-        },
+        metadata: { balanceIds: [], escrowIds: [], transactionIds: [] },
       };
-
       stateValidator.validate(state as any);
       stateValidator.clearHistory();
-
-      const history = stateValidator.getHistory();
-      expect(history.length).toBe(0);
+      expect(stateValidator.getHistory().length).toBe(0);
     });
   });
 });

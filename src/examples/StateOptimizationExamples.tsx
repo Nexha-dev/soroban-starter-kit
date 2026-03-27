@@ -41,7 +41,7 @@ export function AppWithDebugger(): JSX.Element {
           <TransactionQueueProvider>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px' }}>
               <App />
-              {import.meta.env.DEV && <StateDebugger />}
+              {import.meta.env.MODE === 'development' && <StateDebugger />}
             </div>
           </TransactionQueueProvider>
         </StorageProvider>
@@ -157,13 +157,13 @@ export function CustomSelectorExample(): JSX.Element {
   // Get total balance across all tokens
   const totalBalance = useStateSelector(state => {
     return Object.values(state.balances).reduce((sum, balance) => {
-      return sum + parseFloat(balance.amount || '0');
+      return sum + parseFloat((balance as any).amount || '0');
     }, 0);
   });
 
   // Get pending transactions count
   const pendingCount = useStateSelector(state => {
-    return Object.values(state.transactions).filter(tx => tx.status === 'pending').length;
+    return Object.values(state.transactions).filter(tx => (tx as any).status === 'pending').length;
   });
 
   return (

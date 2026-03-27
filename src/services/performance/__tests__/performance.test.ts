@@ -9,10 +9,8 @@ describe('PerformanceMetricsCollector', () => {
 
   it('should record custom metrics', () => {
     performanceMetricsCollector.recordMetric('test-metric', 100, 'ms');
-    // recordMetric stores to internal metrics array; snapshots are collected on interval
-    // verify the summary reflects the recorded data
-    const vitals = performanceMetricsCollector.getVitals();
-    expect(vitals).toBeDefined();
+    const summary = performanceMetricsCollector.getSummary();
+    expect(summary).toBeDefined();
   });
 
   it('should get Core Web Vitals', () => {
@@ -65,7 +63,7 @@ describe('PerformanceAnalyzer', () => {
   it('should provide recommendations', () => {
     const vitals = { lcp: 5000 };
     const analysis = performanceAnalyzer.analyze(vitals, null);
-    expect(analysis.recommendations.some(r => r.id === 'lcp-1')).toBe(true);
+    expect(analysis.recommendations.some((r: any) => r.id === 'lcp-1')).toBe(true);
   });
 
   it('should maintain analysis history', () => {

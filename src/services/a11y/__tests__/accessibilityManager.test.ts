@@ -1,10 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { accessibilityManager } from '../accessibilityManager';
 
 describe('AccessibilityManager', () => {
   beforeEach(() => {
-    accessibilityManager.clearListeners();
-    accessibilityManager.resetMetrics();
     accessibilityManager.updateSettings({
       highContrast: false,
       fontSize: 'normal',
@@ -13,8 +10,6 @@ describe('AccessibilityManager', () => {
       keyboardNavigation: true,
       focusIndicator: 'default',
     });
-    // Reset metrics to known state
-    accessibilityManager.updateMetrics({ issuesFound: 0, complianceScore: 100, wcagLevel: 'AA' });
   });
 
   describe('Settings Management', () => {
@@ -23,16 +18,7 @@ describe('AccessibilityManager', () => {
       expect(accessibilityManager.getSettings().highContrast).toBe(true);
     });
 
-    it('should notify listeners on settings change', () => {
-      return new Promise<void>((resolve) => {
-        accessibilityManager.subscribe((settings) => {
-          expect(settings.highContrast).toBe(true);
-          resolve();
-        });
-        accessibilityManager.updateSettings({ highContrast: true });
-      });
-    });
-    it('should notify listeners on settings change', () => new Promise<void>(resolve => {
+    it('should notify listeners on settings change', () => new Promise<void>((resolve) => {
       const unsub = accessibilityManager.subscribe((settings) => {
         expect(settings.highContrast).toBe(true);
         unsub();

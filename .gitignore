@@ -1,25 +1,48 @@
-node_modules
-docs-report.json/
-# ── Node ──────────────────────────────────────────────────────────────────────
 node_modules/
 dist/
 .DS_Store
 *.log
-
-# ── Environment ───────────────────────────────────────────────────────────────
 .env
-.env.local
-.env.*.local
+node_modules
+soroban-starter-kit/target/
 
-# ── Rust / Cargo ──────────────────────────────────────────────────────────────
+# Rust
 target/
-Cargo.lock
+**/*.rs.bk
 
-# ── Coverage / Reports ────────────────────────────────────────────────────────
+# Node
+node_modules/
+dist/
+build/
+coverage/
+*.local
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test & lint reports
 coverage/
 lint-report.json
 audit-report.json
-/node_modules
-/dist
-/target
-target/
+*.lcov
+
+# Vitest / Vite cache
+.vitest-cache/
+.vite/
+
+# PWA generated files
+public/sw.js
+public/workbox-*.js
+public/sw.js.map
