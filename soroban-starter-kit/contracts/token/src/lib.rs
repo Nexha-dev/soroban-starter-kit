@@ -1,7 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, Address, Env, String, Symbol,
+    contract, contractimpl, contracttype, contracterror, token, Address, Env, String, Symbol,
 };
 
 /// Token contract implementing the Soroban Token Interface
@@ -39,7 +39,8 @@ pub enum MetadataKey {
 }
 
 /// Custom errors for the token contract
-#[contracttype]
+#[contracterror]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TokenError {
     InsufficientBalance = 1,
     InsufficientAllowance = 2,

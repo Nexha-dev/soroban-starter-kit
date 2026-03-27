@@ -60,28 +60,13 @@ self.addEventListener('push', (event: PushEvent) => {
 });
 
 // Open app on notification click
-self.addEventListener('notificationclick', (event: Event) => {
-  const e = event as NotificationEvent;
-  e.notification.close();
-  const url = (e.notification.data as { url?: string })?.url ?? '/';
-  e.waitUntil(
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
+  event.notification.close();
+  const url = (event.notification.data as { url?: string })?.url ?? '/';
+  event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then(clients => {
       const existing = clients.find(c => c.url === url && 'focus' in c);
       return existing ? existing.focus() : self.clients.openWindow(url);
     })
   );
-});
-
-// Periodic background sync
-self.addEventListener('periodicsync', (event: ExtendableEvent & { tag: string }) => {
-  if (event.tag === 'data-refresh') {
-    event.waitUntil(
-      // Revalidate horizon cache on periodic sync
-      caches.open('horizon-api').then(cache =>
-        cache.keys().then(keys =>
-          Promise.all(keys.map(req => fetch(req).then(res => { if (res.ok) cache.put(req, res); }).catch(() => {})))
-        )
-      )
-    );
-  }
 });
