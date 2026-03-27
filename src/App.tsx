@@ -73,6 +73,7 @@ const ComponentDocs = lazy(() => import('./components/ComponentDocs').then(m => 
 const ErrorDashboard = lazy(() => import('./components/ErrorDashboard').then(m => ({ default: m.ErrorDashboard })));
 const UserAnalyticsDashboard = lazy(() => import('./components/UserAnalyticsDashboard').then(m => ({ default: m.UserAnalyticsDashboard })));
 const CMSDashboard = lazy(() => import('./components/CMSDashboard').then(m => ({ default: m.CMSDashboard })));
+const APIFrameworkDashboard = lazy(() => import('./components/APIFrameworkDashboard').then(m => ({ default: m.APIFrameworkDashboard })));
 
 const LazyFallback = () => <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading…</div>;
 
@@ -330,6 +331,15 @@ function App(): JSX.Element {
       onClick: () => {
         setActiveTab('cms' as any);
         setBreadcrumbs([{ label: 'Home' }, { label: 'Content Management' }]);
+      },
+    },
+    {
+      id: 'api-framework',
+      label: 'API Framework',
+      icon: '🔌',
+      onClick: () => {
+        setActiveTab('api-framework' as any);
+        setBreadcrumbs([{ label: 'Home' }, { label: 'API Framework' }]);
       },
     },
   ];
@@ -1326,6 +1336,12 @@ function App(): JSX.Element {
           {(activeTab as string) === 'cms' && (
             <Suspense fallback={<LazyFallback />}>
               <CMSDashboard />
+            </Suspense>
+          )}
+
+          {(activeTab as string) === 'api-framework' && (
+            <Suspense fallback={<LazyFallback />}>
+              <APIFrameworkDashboard />
             </Suspense>
           )}
         </main>
