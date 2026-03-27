@@ -72,6 +72,7 @@ const AccessibilityDashboard = lazy(() => import('./components/AccessibilityDash
 const ComponentDocs = lazy(() => import('./components/ComponentDocs').then(m => ({ default: m.ComponentDocs })));
 const ErrorDashboard = lazy(() => import('./components/ErrorDashboard').then(m => ({ default: m.ErrorDashboard })));
 const UserAnalyticsDashboard = lazy(() => import('./components/UserAnalyticsDashboard').then(m => ({ default: m.UserAnalyticsDashboard })));
+const CMSDashboard = lazy(() => import('./components/CMSDashboard').then(m => ({ default: m.CMSDashboard })));
 
 const LazyFallback = () => <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading…</div>;
 
@@ -320,6 +321,15 @@ function App(): JSX.Element {
       onClick: () => {
         setActiveTab('user-analytics' as any);
         setBreadcrumbs([{ label: 'Home' }, { label: 'User Analytics' }]);
+      },
+    },
+    {
+      id: 'cms',
+      label: 'Content (CMS)',
+      icon: '📝',
+      onClick: () => {
+        setActiveTab('cms' as any);
+        setBreadcrumbs([{ label: 'Home' }, { label: 'Content Management' }]);
       },
     },
   ];
@@ -1310,6 +1320,12 @@ function App(): JSX.Element {
           {(activeTab as string) === 'user-analytics' && (
             <Suspense fallback={<LazyFallback />}>
               <UserAnalyticsDashboard />
+            </Suspense>
+          )}
+
+          {(activeTab as string) === 'cms' && (
+            <Suspense fallback={<LazyFallback />}>
+              <CMSDashboard />
             </Suspense>
           )}
         </main>
