@@ -1,10 +1,10 @@
-import type { ContractABI, FunctionDef, SimulationResult, ParamDef } from './types';
+import type { ContractABI, FunctionDef, SimulationResult, ParamDef, GasEstimate, TxStatusUpdate } from './types';
 
 // ── Built-in ABIs ─────────────────────────────────────────────────────────────
 
 const TOKEN_ABI: FunctionDef[] = [
   {
-    name: 'transfer', label: 'Transfer', icon: '💸',
+    name: 'transfer', label: 'Transfer', icon: '💸', category: 'token',
     description: 'Send tokens to another address.',
     docs: 'Transfers `amount` stroops from the caller to `to`. Emits a Transfer event.',
     estimatedFee: '0.00001',
@@ -14,7 +14,7 @@ const TOKEN_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'mint', label: 'Mint', icon: '🪙',
+    name: 'mint', label: 'Mint', icon: '🪙', category: 'admin',
     description: 'Create new tokens (admin only).',
     docs: 'Mints `amount` stroops to `to`. Caller must be the contract admin.',
     estimatedFee: '0.00001',
@@ -24,7 +24,7 @@ const TOKEN_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'burn', label: 'Burn', icon: '🔥',
+    name: 'burn', label: 'Burn', icon: '🔥', category: 'token',
     description: 'Destroy tokens from your balance.',
     docs: 'Burns `amount` stroops from the caller\'s balance.',
     estimatedFee: '0.00001',
@@ -33,7 +33,7 @@ const TOKEN_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'approve', label: 'Approve', icon: '✅',
+    name: 'approve', label: 'Approve', icon: '✅', category: 'token',
     description: 'Allow a spender to use tokens on your behalf.',
     docs: 'Sets the allowance for `spender` to `amount` stroops, expiring at `expiration_ledger`.',
     estimatedFee: '0.00001',
@@ -44,7 +44,7 @@ const TOKEN_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'balance', label: 'Balance', icon: '📊',
+    name: 'balance', label: 'Balance', icon: '📊', category: 'query',
     description: 'Query token balance of an address.',
     docs: 'Returns the balance in stroops for `id`. Read-only — no transaction required.',
     estimatedFee: '0',
@@ -53,11 +53,22 @@ const TOKEN_ABI: FunctionDef[] = [
       { name: 'id', kind: 'address', label: 'Address', placeholder: 'G...', required: true },
     ],
   },
+  {
+    name: 'allowance', label: 'Allowance', icon: '🔑', category: 'query',
+    description: 'Query the spending allowance for a spender.',
+    docs: 'Returns the allowance in stroops that `spender` can use from `from`.',
+    estimatedFee: '0',
+    readOnly: true,
+    params: [
+      { name: 'from',    kind: 'address', label: 'Owner Address',   placeholder: 'G...', required: true },
+      { name: 'spender', kind: 'address', label: 'Spender Address', placeholder: 'G...', required: true },
+    ],
+  },
 ];
 
 const ESCROW_ABI: FunctionDef[] = [
   {
-    name: 'fund', label: 'Fund Escrow', icon: '🔒',
+    name: 'fund', label: 'Fund Escrow', icon: '🔒', category: 'escrow',
     description: 'Deposit tokens into an escrow contract.',
     docs: 'Transfers `amount` stroops into the escrow. Caller must be the buyer.',
     estimatedFee: '0.00002',
@@ -67,7 +78,7 @@ const ESCROW_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'release', label: 'Release Escrow', icon: '🔓',
+    name: 'release', label: 'Release Escrow', icon: '🔓', category: 'escrow',
     description: 'Release escrowed funds to the seller.',
     docs: 'Marks delivery complete and releases funds to the seller. Caller must be buyer or arbiter.',
     estimatedFee: '0.00001',
@@ -76,10 +87,20 @@ const ESCROW_ABI: FunctionDef[] = [
     ],
   },
   {
-    name: 'refund', label: 'Refund Escrow', icon: '↩️',
+    name: 'refund', label: 'Refund Escrow', icon: '↩️', category: 'escrow',
     description: 'Refund escrowed funds back to the buyer.',
     docs: 'Returns funds to the buyer. Only callable after deadline or by arbiter.',
     estimatedFee: '0.00001',
+    params: [
+      { name: 'escrowId', kind: 'string', label: 'Escrow Contract ID', placeholder: 'C...', required: true },
+    ],
+  },
+  {
+    name: 'status', label: 'Escrow Status', icon: '📋', category: 'query',
+    description: 'Query the current status of an escrow.',
+    docs: 'Returns the escrow state: funded, released, refunded, or pending.',
+    estimatedFee: '0',
+    readOnly: true,
     params: [
       { name: 'escrowId', kind: 'string', label: 'Escrow Contract ID', placeholder: 'C...', required: true },
     ],
@@ -124,22 +145,70 @@ export async function simulateTransaction(
   fnName: string,
   params: Record<string, string>,
 ): Promise<SimulationResult> {
-  // Simulate network latency
-  await new Promise((r) => setTimeout(r, 600));
+  await new Promise((r) => setTimeout(r, 700));
 
-  // Mock: fail if contractId looks invalid
   if (contractId && !/^[A-Za-z0-9_-]+$/.test(contractId)) {
-    return { success: false, error: 'Invalid contract ID format.' };
+    return { success: false, error: 'Invalid contract ID format.', errorCode: 'INVALID_CONTRACT' };
   }
 
   const gasUsed = 500_000 + Math.floor(Math.random() * 200_000);
-  const feeXLM = (gasUsed * 0.0000001).toFixed(7);
+  const feeStroops = Math.ceil(gasUsed * 0.1);
+  const feeXLM = (feeStroops / 1e7).toFixed(7);
+
+  const mockEvents = fnName !== 'balance' && fnName !== 'allowance' && fnName !== 'status'
+    ? [{ type: 'contract', topics: [`fn:${fnName}`, `contract:${contractId}`], data: JSON.stringify(params) }]
+    : [];
+
+  const mockLedgerChanges = fnName === 'transfer' || fnName === 'mint' || fnName === 'burn'
+    ? [{ type: 'updated' as const, key: `balance:${params.to ?? 'caller'}`, before: '0', after: params.amount ?? '0' }]
+    : [];
+
   return {
     success: true,
-    returnValue: fnName === 'balance' ? String(Math.floor(Math.random() * 1e9)) : undefined,
+    returnValue: (fnName === 'balance' || fnName === 'allowance')
+      ? String(Math.floor(Math.random() * 1e9))
+      : fnName === 'status' ? 'funded'
+      : undefined,
+    returnType: (fnName === 'balance' || fnName === 'allowance') ? 'i128' : fnName === 'status' ? 'string' : 'void',
     gasUsed,
     feeXLM,
+    feeStroops,
+    events: mockEvents,
+    ledgerChanges: mockLedgerChanges,
   };
+}
+
+// ── Gas estimation ────────────────────────────────────────────────────────────
+
+export async function estimateGas(
+  _contractId: string,
+  _fnName: string,
+  _params: Record<string, string>,
+): Promise<GasEstimate> {
+  await new Promise((r) => setTimeout(r, 300));
+  const instructions = 400_000 + Math.floor(Math.random() * 150_000);
+  const readBytes = 200 + Math.floor(Math.random() * 300);
+  const writeBytes = 100 + Math.floor(Math.random() * 200);
+  const feeStroops = Math.ceil(instructions * 0.1 + readBytes * 10 + writeBytes * 20);
+  return {
+    instructions,
+    readBytes,
+    writeBytes,
+    feeStroops,
+    feeXLM: (feeStroops / 1e7).toFixed(7),
+    isEstimate: true,
+  };
+}
+
+// ── Transaction status polling (mock) ─────────────────────────────────────────
+
+export async function pollTransactionStatus(txHash: string): Promise<TxStatusUpdate> {
+  await new Promise((r) => setTimeout(r, 1000));
+  const roll = Math.random();
+  if (roll > 0.3) {
+    return { txHash, status: 'success', ledger: 1_000_000 + Math.floor(Math.random() * 10000), timestamp: Date.now() };
+  }
+  return { txHash, status: 'pending' };
 }
 
 // ── ABI discovery ─────────────────────────────────────────────────────────────

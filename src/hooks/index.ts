@@ -40,3 +40,5 @@ export type { UseTokenMetadataParams, UseTokenMetadataResult } from './useTokenM
 
 export { useAllowances } from './useAllowances';
 export type { UseAllowancesParams, UseAllowancesResult } from './useAllowances';
+export { useResponsive, useBreakpoint, useMediaQuery } from './useResponsive';
+export type { ResponsiveState, Breakpoint, DeviceType, Orientation, PointerType } from './useResponsive';

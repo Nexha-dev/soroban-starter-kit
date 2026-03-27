@@ -35,6 +35,7 @@ export { ComplianceDashboard } from './ComplianceDashboard';
 export { SecurityDashboard } from './SecurityDashboard';
 export { TransactionHistory } from './TransactionHistory';
 export { ContractInteraction } from './ContractInteraction';
+export { ContractInteractionUI } from './ContractInteractionUI';
 export { WalletManager } from './WalletManager';
 export { TestDashboard } from './TestDashboard';
 export { SearchAnalyticsDashboard } from './SearchAnalyticsDashboard';
@@ -80,3 +81,18 @@ export { UserOnboarding } from "./UserOnboarding";
 export { UserAnalyticsDashboard } from "./UserAnalyticsDashboard";
 export { CMSDashboard } from "./CMSDashboard";
 export { APIFrameworkDashboard } from "./APIFrameworkDashboard";
+
+export {
+  AppShell,
+  BottomTabBar,
+  Drawer,
+  ResponsiveGrid,
+  ResponsiveStack,
+  Show,
+  Hide,
+  ResponsiveModal,
+  SkipLink,
+  ResponsiveImage,
+} from './ResponsiveLayout';
+export type { TabItem } from './ResponsiveLayout';
+export { CrossPlatformDashboard } from "./CrossPlatformDashboard";

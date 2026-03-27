@@ -65,6 +65,7 @@ type ActiveTab =
 const TransactionFormBuilder = lazy(() => import('./components/TransactionFormBuilder').then(m => ({ default: m.TransactionFormBuilder })));
 const TokenTransferWizard = lazy(() => import('./components/TokenTransferWizard').then(m => ({ default: m.TokenTransferWizard })));
 const PortfolioDashboard = lazy(() => import('./components/PortfolioDashboard').then(m => ({ default: m.PortfolioDashboard })));
+const ContractInteractionUI = lazy(() => import('./components/ContractInteractionUI').then(m => ({ default: m.ContractInteractionUI })));
 const DashboardBuilder = lazy(() => import('./builder/DashboardBuilder').then(m => ({ default: m.DashboardBuilder })));
 const WorkflowLauncher = lazy(() => import('./workflow').then(m => ({ default: m.WorkflowLauncher })));
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard').then(m => ({ default: m.PerformanceDashboard })));
@@ -74,6 +75,7 @@ const ErrorDashboard = lazy(() => import('./components/ErrorDashboard').then(m =
 const UserAnalyticsDashboard = lazy(() => import('./components/UserAnalyticsDashboard').then(m => ({ default: m.UserAnalyticsDashboard })));
 const CMSDashboard = lazy(() => import('./components/CMSDashboard').then(m => ({ default: m.CMSDashboard })));
 const APIFrameworkDashboard = lazy(() => import('./components/APIFrameworkDashboard').then(m => ({ default: m.APIFrameworkDashboard })));
+const CrossPlatformDashboard = lazy(() => import('./components/CrossPlatformDashboard').then(m => ({ default: m.CrossPlatformDashboard })));
 
 const LazyFallback = () => <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading…</div>;
 
@@ -220,6 +222,12 @@ function App(): JSX.Element {
       onClick: () => navigate('analytics', [{ label: 'Home' }, { label: 'Analytics' }]),
     },
     {
+      id: 'contracts',
+      label: 'Contracts',
+      icon: '⚙️',
+      onClick: () => navigate('contracts' as any, [{ label: 'Home' }, { label: 'Contracts' }]),
+    },
+    {
       id: 'transfer',
       label: 'Transfer',
       icon: '💸',
@@ -340,6 +348,15 @@ function App(): JSX.Element {
       onClick: () => {
         setActiveTab('api-framework' as any);
         setBreadcrumbs([{ label: 'Home' }, { label: 'API Framework' }]);
+      },
+    },
+    {
+      id: 'cross-platform',
+      label: 'Cross-Platform',
+      icon: '🖥',
+      onClick: () => {
+        setActiveTab('cross-platform' as any);
+        setBreadcrumbs([{ label: 'Home' }, { label: 'Cross-Platform' }]);
       },
     },
   ];
@@ -1078,6 +1095,12 @@ function App(): JSX.Element {
                     />
                   )}
 
+                  {(activeTab as string) === 'contracts' && (
+                    <Suspense fallback={<LazyFallback />}>
+                      <ContractInteractionUI />
+                    </Suspense>
+                  )}
+
                   {activeTab === 'dashboard' && (
                     <>
                       <h2 className="mb-md">Real-Time Dashboard</h2>
@@ -1342,6 +1365,12 @@ function App(): JSX.Element {
           {(activeTab as string) === 'api-framework' && (
             <Suspense fallback={<LazyFallback />}>
               <APIFrameworkDashboard />
+            </Suspense>
+          )}
+
+          {(activeTab as string) === 'cross-platform' && (
+            <Suspense fallback={<LazyFallback />}>
+              <CrossPlatformDashboard />
             </Suspense>
           )}
         </main>
