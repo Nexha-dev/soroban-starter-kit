@@ -65,6 +65,7 @@ type ActiveTab =
 const TransactionFormBuilder = lazy(() => import('./components/TransactionFormBuilder').then(m => ({ default: m.TransactionFormBuilder })));
 const TokenTransferWizard = lazy(() => import('./components/TokenTransferWizard').then(m => ({ default: m.TokenTransferWizard })));
 const PortfolioDashboard = lazy(() => import('./components/PortfolioDashboard').then(m => ({ default: m.PortfolioDashboard })));
+const ContractInteractionUI = lazy(() => import('./components/ContractInteractionUI').then(m => ({ default: m.ContractInteractionUI })));
 const DashboardBuilder = lazy(() => import('./builder/DashboardBuilder').then(m => ({ default: m.DashboardBuilder })));
 const WorkflowLauncher = lazy(() => import('./workflow').then(m => ({ default: m.WorkflowLauncher })));
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard').then(m => ({ default: m.PerformanceDashboard })));
@@ -219,6 +220,12 @@ function App(): JSX.Element {
       label: 'Analytics',
       icon: '📈',
       onClick: () => navigate('analytics', [{ label: 'Home' }, { label: 'Analytics' }]),
+    },
+    {
+      id: 'contracts',
+      label: 'Contracts',
+      icon: '⚙️',
+      onClick: () => navigate('contracts' as any, [{ label: 'Home' }, { label: 'Contracts' }]),
     },
     {
       id: 'transfer',
@@ -1086,6 +1093,12 @@ function App(): JSX.Element {
                       balances={balances}
                       escrows={escrows}
                     />
+                  )}
+
+                  {(activeTab as string) === 'contracts' && (
+                    <Suspense fallback={<LazyFallback />}>
+                      <ContractInteractionUI />
+                    </Suspense>
                   )}
 
                   {activeTab === 'dashboard' && (
