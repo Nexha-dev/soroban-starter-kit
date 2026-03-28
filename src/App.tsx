@@ -58,6 +58,7 @@ const UserAnalyticsDashboard = lazy(() => import('./components/UserAnalyticsDash
 const CMSDashboard = lazy(() => import('./components/CMSDashboard').then(m => ({ default: m.CMSDashboard })));
 const APIFrameworkDashboard = lazy(() => import('./components/APIFrameworkDashboard').then(m => ({ default: m.APIFrameworkDashboard })));
 const CrossPlatformDashboard = lazy(() => import('./components/CrossPlatformDashboard').then(m => ({ default: m.CrossPlatformDashboard })));
+const BIDashboard = lazy(() => import('./components/BIDashboard').then(m => ({ default: m.BIDashboard })));
 
 const LazyFallback = () => <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading…</div>;
 
@@ -1035,6 +1036,12 @@ function App(): JSX.Element {
           {(activeTab as string) === 'cross-platform' && (
             <Suspense fallback={<LazyFallback />}>
               <CrossPlatformDashboard />
+            </Suspense>
+          )}
+
+          {(activeTab as string) === 'bi-dashboard' && (
+            <Suspense fallback={<LazyFallback />}>
+              <BIDashboard />
             </Suspense>
           )}
         </main>

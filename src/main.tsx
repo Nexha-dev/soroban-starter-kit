@@ -29,6 +29,8 @@ import { SecurityProvider } from './context/SecurityContext';
 import { AdminProvider } from './context/AdminContext';
 import { GatewayProvider } from './context/GatewayContext';
 import { DatabaseProvider } from './context/DatabaseContext';
+import { ComplianceProvider } from './context/ComplianceContext';
+import { AnalyticsProvider } from './context/AnalyticsContext';
 import { WalletProvider } from './context/WalletContext';
 import './styles/index.css';
 
@@ -106,9 +108,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                   <GatewayProvider>
                     <DatabaseProvider>
                       <ComplianceProvider>
-                        <TransactionQueueProvider>
-                          <App />
-                        </TransactionQueueProvider>
+                        <AnalyticsProvider>
+                          <TransactionQueueProvider>
+                            <App />
+                          </TransactionQueueProvider>
+                        </AnalyticsProvider>
                       </ComplianceProvider>
                       <TransactionQueueProvider>
                         <App />

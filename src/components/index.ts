@@ -91,5 +91,12 @@ export {
 } from './ResponsiveLayout';
 export type { TabItem } from './ResponsiveLayout';
 export { CrossPlatformDashboard } from "./CrossPlatformDashboard";
+export { FinancialChart, exportChartCSV, exportChartSVG, exportChartPNG } from './FinancialChart';
+export { PortfolioAnalytics } from './PortfolioAnalytics';
+export { AdminPanel } from './AdminPanel';
+export { ApiGatewayPortal } from './ApiGatewayPortal';
+export { DatabasePanel } from './DatabasePanel';
+export { ComplianceDashboard } from './ComplianceDashboard';
+export { BIDashboard } from './BIDashboard';
 export { default as VideoTutorialDashboard } from './VideoTutorialDashboard';
 export { default as TroubleshootingGuide } from './TroubleshootingGuide';
