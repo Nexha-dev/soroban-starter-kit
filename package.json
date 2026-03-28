@@ -25,6 +25,8 @@
     "audit:report": "npm audit --json > audit-report.json",
     "docs:check": "node scripts/check-docs.mjs",
     "docs:report": "node scripts/check-docs.mjs --report",
+    "docs:generate": "node scripts/generate-guides.mjs",
+    "docs:generate:dry": "node scripts/generate-guides.mjs --dry-run",
     "ci": "npm run lint && npm run docs:check && npm run audit"
   },
   "dependencies": {

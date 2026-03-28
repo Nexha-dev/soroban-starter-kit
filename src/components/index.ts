@@ -1,4 +1,6 @@
 // Components
+export { DocAnalyticsDashboard } from './DocAnalyticsDashboard';
+export { GuideFeedbackWidget } from './GuideFeedbackWidget';
 export { ConnectivityStatus, OfflineBanner } from './ConnectivityStatus';
 export { TransactionItem, TransactionList } from './TransactionItem';
 export { BalanceDisplay, BalanceList } from './BalanceDisplay';
@@ -96,3 +98,5 @@ export { ApiGatewayPortal } from './ApiGatewayPortal';
 export { DatabasePanel } from './DatabasePanel';
 export { ComplianceDashboard } from './ComplianceDashboard';
 export { BIDashboard } from './BIDashboard';
+export { default as VideoTutorialDashboard } from './VideoTutorialDashboard';
+export { default as TroubleshootingGuide } from './TroubleshootingGuide';
