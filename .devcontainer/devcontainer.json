@@ -1,12 +1,8 @@
 {
   "name": "Soroban Starter Kit",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "image": "mcr.microsoft.com/devcontainers/rust:1",
 
   "features": {
-    "ghcr.io/devcontainers/features/rust:1": { 
-      "version": "1.89",
-      "profile": "default"
-    },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false
     }
@@ -14,9 +10,8 @@
 
   "postCreateCommand": "bash scripts/setup.sh",
 
-  "forwardPorts": [3000, 8000, 8001],
+  "forwardPorts": [8000, 8001],
   "portsAttributes": {
-    "3000": { "label": "Frontend Dev Server" },
     "8000": { "label": "Stellar RPC" },
     "8001": { "label": "Horizon API" }
   },
@@ -25,14 +20,10 @@
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer",
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "ms-azuretools.vscode-docker",
-        "bradlc.vscode-tailwindcss"
+        "ms-azuretools.vscode-docker"
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" }
       }
     }
