@@ -1,14 +1,15 @@
 #![no_std]
 
+use soroban_sdk::token::TokenInterface as _;
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, Address, Env, String, Symbol,
+    contract, contracterror, contractimpl, contracttype, token, Address, Env, String, Symbol,
 };
 
 /// Token contract implementing the Soroban Token Interface
-/// 
+///
 /// This contract provides a complete implementation of a fungible token with:
 /// - Standard token operations (transfer, balance, approve)
-/// - Administrative controls (mint, burn, set_admin)
+/// - Administrative controls (mint, admin_burn, set_admin)
 /// - Metadata support (name, symbol, decimals)
 #[contract]
 pub struct TokenContract;
@@ -39,7 +40,8 @@ pub enum MetadataKey {
 }
 
 /// Custom errors for the token contract
-#[contracttype]
+#[contracterror]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TokenError {
     InsufficientBalance = 1,
     InsufficientAllowance = 2,
@@ -66,27 +68,38 @@ impl TokenContract {
 
         // Set admin
         env.storage().instance().set(&DataKey::Admin, &admin);
-        
+
         // Set metadata
-        env.storage().instance().set(&DataKey::Metadata(MetadataKey::Name), &name);
-        env.storage().instance().set(&DataKey::Metadata(MetadataKey::Symbol), &symbol);
-        env.storage().instance().set(&DataKey::Metadata(MetadataKey::Decimals), &decimals);
-        
+        env.storage()
+            .instance()
+            .set(&DataKey::Metadata(MetadataKey::Name), &name);
+        env.storage()
+            .instance()
+            .set(&DataKey::Metadata(MetadataKey::Symbol), &symbol);
+        env.storage()
+            .instance()
+            .set(&DataKey::Metadata(MetadataKey::Decimals), &decimals);
+
         // Initialize total supply to 0
         env.storage().instance().set(&DataKey::TotalSupply, &0i128);
 
         // Emit initialization event
-        env.events().publish((Symbol::new(&env, "initialize"), admin.clone()), (name, symbol, decimals));
+        env.events().publish(
+            (Symbol::new(&env, "initialize"), admin.clone()),
+            (name, symbol, decimals),
+        );
 
         Ok(())
     }
 
     /// Mint new tokens to a recipient (admin only)
     pub fn mint(env: Env, to: Address, amount: i128) -> Result<(), TokenError> {
-        let admin: Address = env.storage().instance()
+        let admin: Address = env
+            .storage()
+            .instance()
             .get(&DataKey::Admin)
             .ok_or(TokenError::NotInitialized)?;
-        
+
         admin.require_auth();
 
         if amount < 0 {
@@ -96,26 +109,35 @@ impl TokenContract {
         // Update recipient balance
         let balance = Self::balance_of(env.clone(), to.clone());
         let new_balance = balance + amount;
-        env.storage().persistent().set(&DataKey::Balance(to.clone()), &new_balance);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(to.clone()), &new_balance);
 
         // Update total supply
-        let total_supply: i128 = env.storage().instance()
+        let total_supply: i128 = env
+            .storage()
+            .instance()
             .get(&DataKey::TotalSupply)
             .unwrap_or(0);
-        env.storage().instance().set(&DataKey::TotalSupply, &(total_supply + amount));
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalSupply, &(total_supply + amount));
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "mint"), to), amount);
+        env.events()
+            .publish((Symbol::new(&env, "mint"), to), amount);
 
         Ok(())
     }
 
     /// Burn tokens from an account (admin only)
-    pub fn burn(env: Env, from: Address, amount: i128) -> Result<(), TokenError> {
-        let admin: Address = env.storage().instance()
+    pub fn admin_burn(env: Env, from: Address, amount: i128) -> Result<(), TokenError> {
+        let admin: Address = env
+            .storage()
+            .instance()
             .get(&DataKey::Admin)
             .ok_or(TokenError::NotInitialized)?;
-        
+
         admin.require_auth();
 
         if amount < 0 {
@@ -129,67 +151,55 @@ impl TokenContract {
 
         // Update balance
         let new_balance = balance - amount;
-        env.storage().persistent().set(&DataKey::Balance(from.clone()), &new_balance);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(from.clone()), &new_balance);
 
         // Update total supply
-        let total_supply: i128 = env.storage().instance()
+        let total_supply: i128 = env
+            .storage()
+            .instance()
             .get(&DataKey::TotalSupply)
             .unwrap_or(0);
-        env.storage().instance().set(&DataKey::TotalSupply, &(total_supply - amount));
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalSupply, &(total_supply - amount));
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "burn"), from), amount);
+        env.events()
+            .publish((Symbol::new(&env, "burn"), from), amount);
 
         Ok(())
     }
 
     /// Set a new admin (current admin only)
     pub fn set_admin(env: Env, new_admin: Address) -> Result<(), TokenError> {
-        let admin: Address = env.storage().instance()
+        let admin: Address = env
+            .storage()
+            .instance()
             .get(&DataKey::Admin)
             .ok_or(TokenError::NotInitialized)?;
-        
+
         admin.require_auth();
-        
+
         env.storage().instance().set(&DataKey::Admin, &new_admin);
-        
+
         // Emit event
-        env.events().publish((Symbol::new(&env, "set_admin"),), new_admin);
+        env.events()
+            .publish((Symbol::new(&env, "set_admin"),), new_admin);
 
         Ok(())
     }
 
     /// Get the current admin
     pub fn admin(env: Env) -> Address {
-        env.storage().instance()
-            .get(&DataKey::Admin)
-            .unwrap()
-    }
-
-    /// Get token name
-    pub fn name(env: Env) -> String {
-        env.storage().instance()
-            .get(&DataKey::Metadata(MetadataKey::Name))
-            .unwrap()
-    }
-
-    /// Get token symbol
-    pub fn symbol(env: Env) -> String {
-        env.storage().instance()
-            .get(&DataKey::Metadata(MetadataKey::Symbol))
-            .unwrap()
-    }
-
-    /// Get token decimals
-    pub fn decimals(env: Env) -> u32 {
-        env.storage().instance()
-            .get(&DataKey::Metadata(MetadataKey::Decimals))
-            .unwrap()
+        env.storage().instance().get(&DataKey::Admin).unwrap()
     }
 
     /// Get total supply
     pub fn total_supply(env: Env) -> i128 {
-        env.storage().instance()
+        env.storage()
+            .instance()
             .get(&DataKey::TotalSupply)
             .unwrap_or(0)
     }
@@ -197,7 +207,7 @@ impl TokenContract {
 
 // Implement the Soroban Token Interface
 #[contractimpl]
-impl token::Interface for TokenContract {
+impl token::TokenInterface for TokenContract {
     fn allowance(env: Env, from: Address, spender: Address) -> i128 {
         let key = DataKey::Allowance(AllowanceDataKey { from, spender });
         env.storage().temporary().get(&key).unwrap_or(0)
@@ -213,13 +223,13 @@ impl token::Interface for TokenContract {
 
         env.storage().temporary().set(&key, &amount);
         if expiration_ledger > env.ledger().sequence() {
-            env.storage().temporary().extend_ttl(&key, expiration_ledger, expiration_ledger);
+            env.storage()
+                .temporary()
+                .extend_ttl(&key, expiration_ledger, expiration_ledger);
         }
 
-        env.events().publish(
-            (Symbol::new(&env, "approve"), from, spender),
-            amount,
-        );
+        env.events()
+            .publish((Symbol::new(&env, "approve"), from, spender), amount);
     }
 
     fn balance(env: Env, id: Address) -> i128 {
@@ -235,26 +245,124 @@ impl token::Interface for TokenContract {
         spender.require_auth();
 
         // Check allowance
-        let allowance = Self::allowance(env.clone(), from.clone(), spender.clone());
+        let key = DataKey::Allowance(AllowanceDataKey {
+            from: from.clone(),
+            spender: spender.clone(),
+        });
+        let allowance: i128 = env.storage().temporary().get(&key).unwrap_or(0);
         if allowance < amount {
             panic!("Insufficient allowance");
         }
 
         // Update allowance
-        let key = DataKey::Allowance(AllowanceDataKey {
-            from: from.clone(),
-            spender: spender.clone(),
-        });
         env.storage().temporary().set(&key, &(allowance - amount));
 
         // Perform transfer
         Self::transfer_impl(env, from, to, amount).unwrap();
     }
+
+    /// Burn tokens from the caller's own balance
+    fn burn(env: Env, from: Address, amount: i128) {
+        from.require_auth();
+
+        if amount < 0 {
+            panic!("Amount must be non-negative");
+        }
+
+        let balance = Self::balance_of(env.clone(), from.clone());
+        if balance < amount {
+            panic!("Insufficient balance");
+        }
+
+        // Update balance
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(from.clone()), &(balance - amount));
+
+        // Update total supply
+        let total_supply: i128 = env
+            .storage()
+            .instance()
+            .get(&DataKey::TotalSupply)
+            .unwrap_or(0);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalSupply, &(total_supply - amount));
+
+        // Emit event
+        env.events()
+            .publish((Symbol::new(&env, "burn"), from), amount);
+    }
+
+    /// Burn tokens from `from` using `spender`'s allowance
+    fn burn_from(env: Env, spender: Address, from: Address, amount: i128) {
+        spender.require_auth();
+
+        if amount < 0 {
+            panic!("Amount must be non-negative");
+        }
+
+        // Check and deduct allowance
+        let key = DataKey::Allowance(AllowanceDataKey {
+            from: from.clone(),
+            spender: spender.clone(),
+        });
+        let allowance: i128 = env.storage().temporary().get(&key).unwrap_or(0);
+        if allowance < amount {
+            panic!("Insufficient allowance");
+        }
+        env.storage().temporary().set(&key, &(allowance - amount));
+
+        // Check and deduct balance
+        let balance = Self::balance_of(env.clone(), from.clone());
+        if balance < amount {
+            panic!("Insufficient balance");
+        }
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(from.clone()), &(balance - amount));
+
+        // Update total supply
+        let total_supply: i128 = env
+            .storage()
+            .instance()
+            .get(&DataKey::TotalSupply)
+            .unwrap_or(0);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalSupply, &(total_supply - amount));
+
+        // Emit event — topics mirror the standard burn event (from's perspective)
+        env.events()
+            .publish((Symbol::new(&env, "burn"), from), amount);
+    }
+
+    fn decimals(env: Env) -> u32 {
+        env.storage()
+            .instance()
+            .get(&DataKey::Metadata(MetadataKey::Decimals))
+            .unwrap()
+    }
+
+    fn name(env: Env) -> String {
+        env.storage()
+            .instance()
+            .get(&DataKey::Metadata(MetadataKey::Name))
+            .unwrap()
+    }
+
+    fn symbol(env: Env) -> String {
+        env.storage()
+            .instance()
+            .get(&DataKey::Metadata(MetadataKey::Symbol))
+            .unwrap()
+    }
 }
 
 impl TokenContract {
     fn balance_of(env: Env, id: Address) -> i128 {
-        env.storage().persistent()
+        env.storage()
+            .persistent()
             .get(&DataKey::Balance(id))
             .unwrap_or(0)
     }
@@ -270,13 +378,18 @@ impl TokenContract {
         }
 
         // Update balances
-        env.storage().persistent().set(&DataKey::Balance(from.clone()), &(from_balance - amount));
-        
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(from.clone()), &(from_balance - amount));
+
         let to_balance = Self::balance_of(env.clone(), to.clone());
-        env.storage().persistent().set(&DataKey::Balance(to.clone()), &(to_balance + amount));
+        env.storage()
+            .persistent()
+            .set(&DataKey::Balance(to.clone()), &(to_balance + amount));
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "transfer"), from, to), amount);
+        env.events()
+            .publish((Symbol::new(&env, "transfer"), from, to), amount);
 
         Ok(())
     }

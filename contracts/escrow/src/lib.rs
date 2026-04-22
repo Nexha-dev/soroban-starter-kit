@@ -1,11 +1,11 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, Address, Env, Symbol,
+    contract, contracterror, contractimpl, contracttype, token, Address, Env, Symbol,
 };
- /// script
+/// script
 /// Escrow contract for secure two-party transactions
-/// 
+///
 /// This contract holds funds in escrow until conditions are met:
 /// - Buyer deposits funds
 /// - Seller can claim after buyer approval or timeout
@@ -29,7 +29,7 @@ pub enum DataKey {
 }
 
 #[contracttype]
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum EscrowState {
     Created = 0,
     Funded = 1,
@@ -40,7 +40,8 @@ pub enum EscrowState {
 }
 
 /// Custom errors for the escrow contract
-#[contracttype]
+#[contracterror]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum EscrowError {
     NotAuthorized = 1,
     InvalidState = 2,
@@ -76,16 +77,30 @@ impl EscrowContract {
         env.storage().instance().set(&DataKey::Buyer, &buyer);
         env.storage().instance().set(&DataKey::Seller, &seller);
         env.storage().instance().set(&DataKey::Arbiter, &arbiter);
-        env.storage().instance().set(&DataKey::TokenContract, &token_contract);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenContract, &token_contract);
         env.storage().instance().set(&DataKey::Amount, &amount);
-        env.storage().instance().set(&DataKey::Deadline, &deadline_ledger);
-        env.storage().instance().set(&DataKey::State, &EscrowState::Created);
-        env.storage().instance().set(&DataKey::BuyerApproved, &false);
-        env.storage().instance().set(&DataKey::SellerDelivered, &false);
+        env.storage()
+            .instance()
+            .set(&DataKey::Deadline, &deadline_ledger);
+        env.storage()
+            .instance()
+            .set(&DataKey::State, &EscrowState::Created);
+        env.storage()
+            .instance()
+            .set(&DataKey::BuyerApproved, &false);
+        env.storage()
+            .instance()
+            .set(&DataKey::SellerDelivered, &false);
 
         // Emit event
         env.events().publish(
-            (Symbol::new(&env, "escrow_created"), buyer.clone(), seller.clone()),
+            (
+                Symbol::new(&env, "escrow_created"),
+                buyer.clone(),
+                seller.clone(),
+            ),
             amount,
         );
 
@@ -94,7 +109,9 @@ impl EscrowContract {
 
     /// Buyer funds the escrow
     pub fn fund(env: Env) -> Result<(), EscrowError> {
-        let state: EscrowState = env.storage().instance()
+        let state: EscrowState = env
+            .storage()
+            .instance()
             .get(&DataKey::State)
             .ok_or(EscrowError::NotInitialized)?;
 
@@ -103,7 +120,11 @@ impl EscrowContract {
         }
 
         let buyer: Address = env.storage().instance().get(&DataKey::Buyer).unwrap();
-        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).unwrap();
+        let token_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenContract)
+            .unwrap();
         let amount: i128 = env.storage().instance().get(&DataKey::Amount).unwrap();
 
         buyer.require_auth();
@@ -113,17 +134,22 @@ impl EscrowContract {
         token_client.transfer(&buyer, &env.current_contract_address(), &amount);
 
         // Update state
-        env.storage().instance().set(&DataKey::State, &EscrowState::Funded);
+        env.storage()
+            .instance()
+            .set(&DataKey::State, &EscrowState::Funded);
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "escrow_funded"), buyer), amount);
+        env.events()
+            .publish((Symbol::new(&env, "escrow_funded"), buyer), amount);
 
         Ok(())
     }
 
     /// Seller marks delivery as complete
     pub fn mark_delivered(env: Env) -> Result<(), EscrowError> {
-        let state: EscrowState = env.storage().instance()
+        let state: EscrowState = env
+            .storage()
+            .instance()
             .get(&DataKey::State)
             .ok_or(EscrowError::NotInitialized)?;
 
@@ -135,18 +161,25 @@ impl EscrowContract {
         seller.require_auth();
 
         // Mark as delivered
-        env.storage().instance().set(&DataKey::SellerDelivered, &true);
-        env.storage().instance().set(&DataKey::State, &EscrowState::Delivered);
+        env.storage()
+            .instance()
+            .set(&DataKey::SellerDelivered, &true);
+        env.storage()
+            .instance()
+            .set(&DataKey::State, &EscrowState::Delivered);
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "delivery_marked"), seller), ());
+        env.events()
+            .publish((Symbol::new(&env, "delivery_marked"), seller), ());
 
         Ok(())
     }
 
     /// Buyer approves delivery and releases funds
     pub fn approve_delivery(env: Env) -> Result<(), EscrowError> {
-        let state: EscrowState = env.storage().instance()
+        let state: EscrowState = env
+            .storage()
+            .instance()
             .get(&DataKey::State)
             .ok_or(EscrowError::NotInitialized)?;
 
@@ -165,7 +198,9 @@ impl EscrowContract {
 
     /// Buyer requests refund (only before delivery or after deadline)
     pub fn request_refund(env: Env) -> Result<(), EscrowError> {
-        let state: EscrowState = env.storage().instance()
+        let state: EscrowState = env
+            .storage()
+            .instance()
             .get(&DataKey::State)
             .ok_or(EscrowError::NotInitialized)?;
 
@@ -199,7 +234,9 @@ impl EscrowContract {
 
     /// Arbiter resolves dispute (can release to either party)
     pub fn resolve_dispute(env: Env, release_to_seller: bool) -> Result<(), EscrowError> {
-        let state: EscrowState = env.storage().instance()
+        let state: EscrowState = env
+            .storage()
+            .instance()
             .get(&DataKey::State)
             .ok_or(EscrowError::NotInitialized)?;
 
@@ -220,28 +257,45 @@ impl EscrowContract {
     }
 
     /// Get escrow details
-    pub fn get_escrow_info(env: Env) -> (Address, Address, Address, Address, i128, u32, EscrowState) {
+    pub fn get_escrow_info(
+        env: Env,
+    ) -> (Address, Address, Address, Address, i128, u32, EscrowState) {
         let buyer: Address = env.storage().instance().get(&DataKey::Buyer).unwrap();
         let seller: Address = env.storage().instance().get(&DataKey::Seller).unwrap();
         let arbiter: Address = env.storage().instance().get(&DataKey::Arbiter).unwrap();
-        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).unwrap();
+        let token_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenContract)
+            .unwrap();
         let amount: i128 = env.storage().instance().get(&DataKey::Amount).unwrap();
         let deadline: u32 = env.storage().instance().get(&DataKey::Deadline).unwrap();
         let state: EscrowState = env.storage().instance().get(&DataKey::State).unwrap();
 
-        (buyer, seller, arbiter, token_contract, amount, deadline, state)
+        (
+            buyer,
+            seller,
+            arbiter,
+            token_contract,
+            amount,
+            deadline,
+            state,
+        )
     }
 
     /// Get current state
     pub fn get_state(env: Env) -> EscrowState {
-        env.storage().instance()
+        env.storage()
+            .instance()
             .get(&DataKey::State)
             .unwrap_or(EscrowState::Created)
     }
 
     /// Check if deadline has passed
     pub fn is_deadline_passed(env: Env) -> bool {
-        let deadline: u32 = env.storage().instance()
+        let deadline: u32 = env
+            .storage()
+            .instance()
             .get(&DataKey::Deadline)
             .unwrap_or(0);
         env.ledger().sequence() > deadline
@@ -250,7 +304,11 @@ impl EscrowContract {
     // Internal helper functions
     fn release_to_seller(env: Env) -> Result<(), EscrowError> {
         let seller: Address = env.storage().instance().get(&DataKey::Seller).unwrap();
-        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).unwrap();
+        let token_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenContract)
+            .unwrap();
         let amount: i128 = env.storage().instance().get(&DataKey::Amount).unwrap();
 
         // Transfer tokens to seller
@@ -258,17 +316,24 @@ impl EscrowContract {
         token_client.transfer(&env.current_contract_address(), &seller, &amount);
 
         // Update state
-        env.storage().instance().set(&DataKey::State, &EscrowState::Completed);
+        env.storage()
+            .instance()
+            .set(&DataKey::State, &EscrowState::Completed);
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "funds_released"), seller), amount);
+        env.events()
+            .publish((Symbol::new(&env, "funds_released"), seller), amount);
 
         Ok(())
     }
 
     fn refund_to_buyer(env: Env) -> Result<(), EscrowError> {
         let buyer: Address = env.storage().instance().get(&DataKey::Buyer).unwrap();
-        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).unwrap();
+        let token_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenContract)
+            .unwrap();
         let amount: i128 = env.storage().instance().get(&DataKey::Amount).unwrap();
 
         // Transfer tokens back to buyer
@@ -276,13 +341,17 @@ impl EscrowContract {
         token_client.transfer(&env.current_contract_address(), &buyer, &amount);
 
         // Update state
-        env.storage().instance().set(&DataKey::State, &EscrowState::Refunded);
+        env.storage()
+            .instance()
+            .set(&DataKey::State, &EscrowState::Refunded);
 
         // Emit event
-        env.events().publish((Symbol::new(&env, "funds_refunded"), buyer), amount);
+        env.events()
+            .publish((Symbol::new(&env, "funds_refunded"), buyer), amount);
 
         Ok(())
     }
 }
 
 mod test;
+
