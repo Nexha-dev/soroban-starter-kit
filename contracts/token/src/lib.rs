@@ -4,6 +4,17 @@ use soroban_sdk::{
     contract, contractimpl, contracttype, token, Address, Env, String, Symbol,
 };
 
+const BUMP_THRESHOLD: u32 = 120_960;
+const BUMP_AMOUNT: u32 = 518_400;
+
+fn bump_instance(env: &Env) {
+    env.storage().instance().extend_ttl(BUMP_THRESHOLD, BUMP_AMOUNT);
+}
+
+fn bump_persistent(env: &Env, key: &DataKey) {
+    env.storage().persistent().extend_ttl(key, BUMP_THRESHOLD, BUMP_AMOUNT);
+}
+
 /// Token contract implementing the Soroban Token Interface
 /// 
 /// This contract provides a complete implementation of a fungible token with:
@@ -74,6 +85,7 @@ impl TokenContract {
         
         // Initialize total supply to 0
         env.storage().instance().set(&DataKey::TotalSupply, &0i128);
+        bump_instance(&env);
 
         // Emit initialization event
         env.events().publish((Symbol::new(&env, "initialize"), admin.clone()), (name, symbol, decimals));
@@ -97,12 +109,14 @@ impl TokenContract {
         let balance = Self::balance_of(env.clone(), to.clone());
         let new_balance = balance + amount;
         env.storage().persistent().set(&DataKey::Balance(to.clone()), &new_balance);
+        bump_persistent(&env, &DataKey::Balance(to.clone()));
 
         // Update total supply
         let total_supply: i128 = env.storage().instance()
             .get(&DataKey::TotalSupply)
             .unwrap_or(0);
         env.storage().instance().set(&DataKey::TotalSupply, &(total_supply + amount));
+        bump_instance(&env);
 
         // Emit event
         env.events().publish((Symbol::new(&env, "mint"), to), amount);
@@ -130,12 +144,14 @@ impl TokenContract {
         // Update balance
         let new_balance = balance - amount;
         env.storage().persistent().set(&DataKey::Balance(from.clone()), &new_balance);
+        bump_persistent(&env, &DataKey::Balance(from.clone()));
 
         // Update total supply
         let total_supply: i128 = env.storage().instance()
             .get(&DataKey::TotalSupply)
             .unwrap_or(0);
         env.storage().instance().set(&DataKey::TotalSupply, &(total_supply - amount));
+        bump_instance(&env);
 
         // Emit event
         env.events().publish((Symbol::new(&env, "burn"), from), amount);
@@ -152,6 +168,7 @@ impl TokenContract {
         admin.require_auth();
         
         env.storage().instance().set(&DataKey::Admin, &new_admin);
+        bump_instance(&env);
         
         // Emit event
         env.events().publish((Symbol::new(&env, "set_admin"),), new_admin);
@@ -271,9 +288,11 @@ impl TokenContract {
 
         // Update balances
         env.storage().persistent().set(&DataKey::Balance(from.clone()), &(from_balance - amount));
+        bump_persistent(&env, &DataKey::Balance(from.clone()));
         
         let to_balance = Self::balance_of(env.clone(), to.clone());
         env.storage().persistent().set(&DataKey::Balance(to.clone()), &(to_balance + amount));
+        bump_persistent(&env, &DataKey::Balance(to.clone()));
 
         // Emit event
         env.events().publish((Symbol::new(&env, "transfer"), from, to), amount);
