@@ -100,7 +100,7 @@ fn test_mark_delivered() {
     client.mark_delivered();
 
     // Verify state change
-    assert_eq!(client.get_state(), EscrowState::Delivered);
+    assert_eq!(client.get_state(), Some(EscrowState::Delivered));
 }
 
 #[test]
@@ -124,7 +124,7 @@ fn test_approve_delivery() {
     client.approve_delivery();
 
     // Verify completion
-    assert_eq!(client.get_state(), EscrowState::Completed);
+    assert_eq!(client.get_state(), Some(EscrowState::Completed));
 }
 
 #[test]
@@ -176,7 +176,7 @@ fn test_arbiter_resolve_to_seller() {
     client.resolve_dispute(&true);
 
     // Verify completion
-    assert_eq!(client.get_state(), EscrowState::Completed);
+    assert_eq!(client.get_state(), Some(EscrowState::Completed));
 }
 
 #[test]
@@ -201,5 +201,5 @@ fn test_arbiter_resolve_to_buyer() {
     client.resolve_dispute(&false);
 
     // Verify refund
-    assert_eq!(client.get_state(), EscrowState::Refunded);
+    assert_eq!(client.get_state(), Some(EscrowState::Refunded));
 }

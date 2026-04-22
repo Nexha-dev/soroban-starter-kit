@@ -220,23 +220,21 @@ impl EscrowContract {
     }
 
     /// Get escrow details
-    pub fn get_escrow_info(env: Env) -> (Address, Address, Address, Address, i128, u32, EscrowState) {
-        let buyer: Address = env.storage().instance().get(&DataKey::Buyer).unwrap();
-        let seller: Address = env.storage().instance().get(&DataKey::Seller).unwrap();
-        let arbiter: Address = env.storage().instance().get(&DataKey::Arbiter).unwrap();
-        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).unwrap();
-        let amount: i128 = env.storage().instance().get(&DataKey::Amount).unwrap();
-        let deadline: u32 = env.storage().instance().get(&DataKey::Deadline).unwrap();
-        let state: EscrowState = env.storage().instance().get(&DataKey::State).unwrap();
+    pub fn get_escrow_info(env: Env) -> Result<(Address, Address, Address, Address, i128, u32, EscrowState), EscrowError> {
+        let buyer: Address = env.storage().instance().get(&DataKey::Buyer).ok_or(EscrowError::NotInitialized)?;
+        let seller: Address = env.storage().instance().get(&DataKey::Seller).ok_or(EscrowError::NotInitialized)?;
+        let arbiter: Address = env.storage().instance().get(&DataKey::Arbiter).ok_or(EscrowError::NotInitialized)?;
+        let token_contract: Address = env.storage().instance().get(&DataKey::TokenContract).ok_or(EscrowError::NotInitialized)?;
+        let amount: i128 = env.storage().instance().get(&DataKey::Amount).ok_or(EscrowError::NotInitialized)?;
+        let deadline: u32 = env.storage().instance().get(&DataKey::Deadline).ok_or(EscrowError::NotInitialized)?;
+        let state: EscrowState = env.storage().instance().get(&DataKey::State).ok_or(EscrowError::NotInitialized)?;
 
-        (buyer, seller, arbiter, token_contract, amount, deadline, state)
+        Ok((buyer, seller, arbiter, token_contract, amount, deadline, state))
     }
 
     /// Get current state
-    pub fn get_state(env: Env) -> EscrowState {
-        env.storage().instance()
-            .get(&DataKey::State)
-            .unwrap_or(EscrowState::Created)
+    pub fn get_state(env: Env) -> Option<EscrowState> {
+        env.storage().instance().get(&DataKey::State)
     }
 
     /// Check if deadline has passed
