@@ -1073,6 +1073,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "soroban-common"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "soroban-env-common"
 version = "21.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1153,6 +1160,7 @@ dependencies = [
 name = "soroban-escrow-template"
 version = "0.1.0"
 dependencies = [
+ "soroban-common",
  "soroban-sdk",
 ]
 
@@ -1244,6 +1252,7 @@ dependencies = [
 name = "soroban-token-template"
 version = "0.1.0"
 dependencies = [
+ "soroban-common",
  "soroban-sdk",
 ]
 
