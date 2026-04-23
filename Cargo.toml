@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "contracts/common",
     "contracts/token",
     "contracts/escrow",
 ]
@@ -7,6 +8,7 @@ resolver = "2"
 
 [workspace.dependencies]
 soroban-sdk = "21"
+soroban-common = { path = "contracts/common" }
 
 [workspace.metadata]
 name = "soroban-contract-templates"
