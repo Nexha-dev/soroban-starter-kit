@@ -213,7 +213,8 @@ impl token::Interface for TokenContract {
 
         env.storage().temporary().set(&key, &amount);
         if expiration_ledger > env.ledger().sequence() {
-            env.storage().temporary().extend_ttl(&key, expiration_ledger, expiration_ledger);
+            let ttl = expiration_ledger.saturating_sub(env.ledger().sequence());
+            env.storage().temporary().extend_ttl(&key, ttl, ttl);
         }
 
         env.events().publish(
