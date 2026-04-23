@@ -19,6 +19,13 @@ pub struct AllowanceDataKey {
 
 #[contracttype]
 #[derive(Clone)]
+pub struct AllowanceValue {
+    pub amount: i128,
+    pub expiration_ledger: u32,
+}
+
+#[contracttype]
+#[derive(Clone)]
 pub enum MetadataKey {
     Name,
     Symbol,

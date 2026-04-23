@@ -5,6 +5,9 @@ target/
 # Soroban build artifacts
 **/*.wasm
 
+# Soroban test snapshots (generated at test time, not for source control)
+**/test_snapshots/
+
 # Environment
 .env
 .env.*

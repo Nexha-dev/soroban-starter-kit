@@ -10,4 +10,5 @@ pub enum EscrowError {
     AlreadyInitialized = 5,
     NotInitialized = 6,
     InsufficientFunds = 7,
+    InvalidAmount = 8,
 }

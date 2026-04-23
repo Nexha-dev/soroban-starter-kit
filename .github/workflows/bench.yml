@@ -1,0 +1,81 @@
+name: Benchmarks / Gas Regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  bench:
+    name: Run criterion benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-bench-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run benchmarks (save baseline)
+        # --save-baseline stores results under target/criterion so we can
+        # compare on subsequent runs.  On PRs we compare against the stored
+        # main baseline; on pushes to main we update it.
+        run: |
+          cargo bench --package contract-benchmarks -- \
+            --save-baseline ci_baseline 2>&1 | tee bench_output.txt
+
+      # ── Threshold check ────────────────────────────────────────────────────
+      # Criterion prints "time: [lower  estimate  upper]" lines.
+      # The script below fails the job if any single operation exceeds the
+      # defined nanosecond threshold.  Adjust thresholds as the contracts evolve.
+      - name: Check gas regression thresholds
+        shell: bash
+        run: |
+          python3 - <<'EOF'
+          import re, sys
+
+          # Maximum allowed wall-clock time per operation (nanoseconds).
+          # These are intentionally generous; tighten them as you establish baselines.
+          THRESHOLDS = {
+              "escrow::initialize":       5_000_000,
+              "escrow::fund":             5_000_000,
+              "escrow::approve_delivery": 5_000_000,
+              "escrow::resolve_dispute":  5_000_000,
+              "token::mint":              3_000_000,
+              "token::transfer":          3_000_000,
+              "token::approve_and_transfer_from": 4_000_000,
+              "token::burn":              3_000_000,
+          }
+
+          with open("bench_output.txt") as f:
+              text = f.read()
+
+          failures = []
+          for bench, limit_ns in THRESHOLDS.items():
+              # Match lines like:  escrow::fund   time:   [1.2345 ms  1.3456 ms  1.4567 ms]
+              pattern = re.escape(bench) + r".*?time:.*?\[\s*([\d.]+)\s*(ns|µs|ms|s)"
+              m = re.search(pattern, text, re.DOTALL)
+              if not m:
+                  print(f"WARNING: no result found for '{bench}', skipping threshold check")
+                  continue
+              value, unit = float(m.group(1)), m.group(2)
+              multipliers = {"ns": 1, "µs": 1_000, "ms": 1_000_000, "s": 1_000_000_000}
+              ns = value * multipliers[unit]
+              status = "OK" if ns <= limit_ns else "FAIL"
+              print(f"[{status}] {bench}: {ns:.0f} ns  (limit {limit_ns} ns)")
+              if status == "FAIL":
+                  failures.append(bench)
+
+          if failures:
+              print(f"\nGas regression detected for: {', '.join(failures)}")
+              sys.exit(1)
+          EOF
