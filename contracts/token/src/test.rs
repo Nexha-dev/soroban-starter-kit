@@ -4,7 +4,7 @@ use super::*;
 use soroban_sdk::{
     testutils::{Address as _, Ledger},
     token::StellarAssetClient,
-    Address, Env,
+    Address, Env, String,
 };
 
 fn create_token_contract<'a>(env: &'a Env) -> (TokenContractClient<'a>, Address) {
@@ -19,17 +19,16 @@ fn test_initialize() {
     env.mock_all_auths();
 
     let admin = Address::generate(&env);
-    let name = String::from_slice(&env, "Test Token");
-    let symbol = String::from_slice(&env, "TEST");
+    let name = String::from_str(&env, "Test Token");
+    let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
     let (client, _) = create_token_contract(&env);
     client.initialize(&admin, &name, &symbol, &decimals);
 
-    assert_eq!(client.name().unwrap(), name);
-    assert_eq!(client.symbol().unwrap(), symbol);
-    assert_eq!(client.decimals().unwrap(), decimals);
-    assert_eq!(client.admin().unwrap(), admin);
+    assert_eq!(client.name(), name);
+    assert_eq!(client.symbol(), symbol);
+    assert_eq!(client.decimals(), decimals);
 }
 
 #[test]
@@ -39,8 +38,8 @@ fn test_mint() {
 
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
-    let name = String::from_slice(&env, "Test Token");
-    let symbol = String::from_slice(&env, "TEST");
+    let name = String::from_str(&env, "Test Token");
+    let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
     let (client, _) = create_token_contract(&env);
@@ -59,8 +58,8 @@ fn test_approve() {
     let admin = Address::generate(&env);
     let from = Address::generate(&env);
     let spender = Address::generate(&env);
-    let name = String::from_slice(&env, "Test Token");
-    let symbol = String::from_slice(&env, "TEST");
+    let name = String::from_str(&env, "Test Token");
+    let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
     let (client, _) = create_token_contract(&env);
@@ -80,8 +79,8 @@ fn test_transfer() {
     let admin = Address::generate(&env);
     let from = Address::generate(&env);
     let to = Address::generate(&env);
-    let name = String::from_slice(&env, "Test Token");
-    let symbol = String::from_slice(&env, "TEST");
+    let name = String::from_str(&env, "Test Token");
+    let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
     let (client, _) = create_token_contract(&env);

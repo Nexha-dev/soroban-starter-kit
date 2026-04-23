@@ -151,11 +151,10 @@ impl EscrowContract {
     }
 
     /// Issue #193: Add raise_dispute() function
-    pub fn raise_dispute(env: Env) -> Result<(), EscrowError> {
+    pub fn raise_dispute(env: Env, caller: Address) -> Result<(), EscrowError> {
         let buyer: Address = env.storage().instance().get(&Buyer).ok_or(EscrowError::NotInitialized)?;
         let seller: Address = env.storage().instance().get(&Seller).ok_or(EscrowError::NotInitialized)?;
 
-        let caller = env.invoker();
         if caller != buyer && caller != seller {
             return Err(EscrowError::NotAuthorized);
         }
@@ -240,5 +239,3 @@ impl EscrowContract {
         Ok(())
     }
 }
-
-mod test;

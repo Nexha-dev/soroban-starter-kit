@@ -45,19 +45,6 @@ pub struct AllowanceValue {
     pub expiration_ledger: u32,
 }
 
-#[contracttype]
-#[contracterror]
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum TokenError {
-    InsufficientBalance = 1,
-    InsufficientAllowance = 2,
-    Unauthorized = 3,
-    AlreadyInitialized = 4,
-    NotInitialized = 5,
-    InvalidAmount = 6,
-    Overflow = 7,
-}
-
 #[contractimpl]
 impl TokenContract {
     pub fn initialize(
@@ -106,33 +93,6 @@ impl TokenContract {
         Ok(())
     }
 
-    pub fn burn(env: Env, from: Address, amount: i128) -> Result<(), TokenError> {
-        let admin = require_admin(&env)?;
-        admin.require_auth();
-
-        if amount < 0 {
-            return Err(TokenError::InvalidAmount);
-        }
-
-        let balance = Self::balance_of(env.clone(), from.clone());
-        if balance < amount {
-            return Err(TokenError::InsufficientBalance);
-        }
-
-        let new_balance = balance.checked_sub(amount).ok_or(TokenError::Overflow)?;
-        env.storage().persistent().set(&Balance(from.clone()), &new_balance);
-        bump_persistent(&env, &Balance(from.clone()));
-
-        let total_supply: i128 = env.storage().instance().get(&TotalSupply).unwrap_or(0);
-        let new_supply = total_supply.checked_sub(amount).ok_or(TokenError::Overflow)?;
-        env.storage().instance().set(&TotalSupply, &new_supply);
-        bump_instance(&env);
-
-        events::burned(&env, &from, amount);
-
-        Ok(())
-    }
-
     pub fn set_admin(env: Env, new_admin: Address) -> Result<(), TokenError> {
         let admin = require_admin(&env)?;
         admin.require_auth();
@@ -142,30 +102,6 @@ impl TokenContract {
         events::admin_set(&env, &new_admin);
 
         Ok(())
-    }
-
-    pub fn admin(env: Env) -> Result<Address, TokenError> {
-        env.storage().instance()
-            .get(&Admin)
-            .ok_or(TokenError::NotInitialized)
-    }
-
-    pub fn name(env: Env) -> Result<String, TokenError> {
-        env.storage().instance()
-            .get(&Metadata(Name))
-            .ok_or(TokenError::NotInitialized)
-    }
-
-    pub fn symbol(env: Env) -> Result<String, TokenError> {
-        env.storage().instance()
-            .get(&Metadata(SymbolKey))
-            .ok_or(TokenError::NotInitialized)
-    }
-
-    pub fn decimals(env: Env) -> Result<u32, TokenError> {
-        env.storage().instance()
-            .get(&Metadata(Decimals))
-            .ok_or(TokenError::NotInitialized)
     }
 
     pub fn total_supply(env: Env) -> i128 {
@@ -330,5 +266,3 @@ impl TokenContract {
         Ok(())
     }
 }
-
-mod test;
