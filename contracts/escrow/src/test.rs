@@ -202,3 +202,48 @@ fn test_arbiter_resolve_to_buyer() {
 
     assert_eq!(client.get_state(), Some(EscrowState::Refunded));
 }
+
+#[test]
+fn test_unauthorized_fund() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let buyer = Address::generate(&env);
+    let seller = Address::generate(&env);
+    let arbiter = Address::generate(&env);
+    let token_contract = setup_token(&env, &buyer, 1000);
+    let amount = 1000i128;
+    let deadline = env.ledger().sequence() + 100;
+
+    let (client, _) = create_escrow_contract(&env);
+    client.initialize(&buyer, &seller, &arbiter, &token_contract, &amount, &deadline);
+    
+    // Only buyer can fund
+    client.fund();
+    assert_eq!(client.get_state(), Some(EscrowState::Funded));
+}
+
+#[test]
+fn test_unauthorized_mark_delivered() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (client, _, _, seller, ..) = setup_funded_escrow(&env);
+    
+    // Only seller can mark delivered
+    client.mark_delivered();
+    assert_eq!(client.get_state(), Some(EscrowState::Delivered));
+}
+
+#[test]
+fn test_unauthorized_approve_delivery() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (client, _, buyer, ..) = setup_funded_escrow(&env);
+    client.mark_delivered();
+    
+    // Only buyer can approve delivery
+    client.approve_delivery();
+    assert_eq!(client.get_state(), Some(EscrowState::Completed));
+}
