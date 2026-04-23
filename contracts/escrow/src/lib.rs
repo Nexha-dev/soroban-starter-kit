@@ -9,7 +9,8 @@ mod test;
 pub use errors::EscrowError;
 pub use storage::{DataKey, EscrowInfo, EscrowState};
 
-use storage::DataKey::{Amount, Arbiter, Buyer, BuyerApproved, Deadline, Seller, SellerDelivered, State, TokenContract};
+use admin::require_admin;
+use storage::DataKey::{Amount, Arbiter, Buyer, BuyerApproved, Deadline, Seller, SellerDelivered, State, TokenContract, Paused};
 
 use soroban_sdk::{contract, contractimpl, token, Address, Env, Symbol};
 
@@ -65,6 +66,7 @@ impl EscrowContract {
 
     /// Buyer funds the escrow by transferring tokens to the contract.
     pub fn fund(env: Env) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -90,6 +92,7 @@ impl EscrowContract {
 
     /// Seller marks goods/services as delivered.
     pub fn mark_delivered(env: Env) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -109,6 +112,7 @@ impl EscrowContract {
 
     /// Buyer approves delivery, releasing funds to the seller.
     pub fn approve_delivery(env: Env) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -125,6 +129,7 @@ impl EscrowContract {
 
     /// Buyer requests a refund after the deadline has passed.
     pub fn request_refund(env: Env) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -143,6 +148,7 @@ impl EscrowContract {
 
     /// Arbiter resolves a dispute.
     pub fn resolve_dispute(env: Env, release_to_seller: bool) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -162,6 +168,7 @@ impl EscrowContract {
 
     /// Buyer partially releases `amount` tokens to the seller.
     pub fn release_partial(env: Env, amount: i128) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -192,6 +199,7 @@ impl EscrowContract {
 
     /// Buyer cancels an unfunded escrow (Created state only).
     pub fn cancel(env: Env) -> Result<(), EscrowError> {
+        Self::require_not_paused(&env)?;
         let state: EscrowState = env
             .storage()
             .instance()
@@ -241,6 +249,29 @@ impl EscrowContract {
         let deadline: u32 = env.storage().instance().get(&Deadline).unwrap_or(0);
         env.ledger().sequence() > deadline
     }
+
+    /// Pause the contract. Admin only.
+    pub fn pause(env: Env) -> Result<(), EscrowError> {
+        let admin = require_admin(&env)?;
+        admin.require_auth();
+        env.storage().instance().set(&Paused, &true);
+        bump_instance(&env);
+        Ok(())
+    }
+
+    /// Unpause the contract. Admin only.
+    pub fn unpause(env: Env) -> Result<(), EscrowError> {
+        let admin = require_admin(&env)?;
+        admin.require_auth();
+        env.storage().instance().set(&Paused, &false);
+        bump_instance(&env);
+        Ok(())
+    }
+
+    /// Check if the contract is paused.
+    pub fn is_paused(env: Env) -> bool {
+        env.storage().instance().get(&Paused).unwrap_or(false)
+    }
 }
 
 impl EscrowContract {
@@ -275,6 +306,13 @@ impl EscrowContract {
             &amount,
         );
         events::funds_refunded(&env, &buyer, amount);
+        Ok(())
+    }
+
+    fn require_not_paused(env: &Env) -> Result<(), EscrowError> {
+        if env.storage().instance().get(&Paused).unwrap_or(false) {
+            return Err(EscrowError::NotAuthorized);
+        }
         Ok(())
     }
 }

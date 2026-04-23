@@ -12,6 +12,7 @@ pub enum DataKey {
     State,
     BuyerApproved,
     SellerDelivered,
+    Paused,
 }
 
 #[contracttype]

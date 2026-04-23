@@ -13,7 +13,7 @@ use admin::require_admin;
 use soroban_sdk::{
     contract, contractimpl, panic_with_error, token, Address, Env, String, Symbol,
 };
-use storage::DataKey::{Admin, Allowance, Balance, Metadata, TotalSupply};
+use storage::DataKey::{Admin, Allowance, Balance, Metadata, TotalSupply, Paused};
 use storage::MetadataKey::{Decimals, Name, Symbol as SymbolKey};
 
 const BUMP_THRESHOLD: u32 = 120_960;
@@ -63,6 +63,7 @@ impl TokenContract {
     pub fn mint(env: Env, to: Address, amount: i128) -> Result<(), TokenError> {
         let admin = require_admin(&env)?;
         admin.require_auth();
+        Self::require_not_paused(&env)?;
         if amount < 0 {
             return Err(TokenError::InsufficientBalance);
         }
@@ -81,6 +82,7 @@ impl TokenContract {
     pub fn burn_admin(env: Env, from: Address, amount: i128) -> Result<(), TokenError> {
         let admin = require_admin(&env)?;
         admin.require_auth();
+        Self::require_not_paused(&env)?;
         if amount < 0 {
             return Err(TokenError::InsufficientBalance);
         }
@@ -98,7 +100,7 @@ impl TokenContract {
         Ok(())
     }
 
-    /// Transfer admin role to `new_admin`. Current admin only.
+    /// Set admin role to `new_admin`. Current admin only.
     pub fn set_admin(env: Env, new_admin: Address) -> Result<(), TokenError> {
         let admin = require_admin(&env)?;
         admin.require_auth();
@@ -106,6 +108,29 @@ impl TokenContract {
         bump_instance(&env);
         events::admin_set(&env, &new_admin);
         Ok(())
+    }
+
+    /// Pause the contract. Admin only.
+    pub fn pause(env: Env) -> Result<(), TokenError> {
+        let admin = require_admin(&env)?;
+        admin.require_auth();
+        env.storage().instance().set(&Paused, &true);
+        bump_instance(&env);
+        Ok(())
+    }
+
+    /// Unpause the contract. Admin only.
+    pub fn unpause(env: Env) -> Result<(), TokenError> {
+        let admin = require_admin(&env)?;
+        admin.require_auth();
+        env.storage().instance().set(&Paused, &false);
+        bump_instance(&env);
+        Ok(())
+    }
+
+    /// Check if the contract is paused.
+    pub fn is_paused(env: Env) -> bool {
+        env.storage().instance().get(&Paused).unwrap_or(false)
     }
 
     pub fn admin(env: Env) -> Address {
@@ -323,12 +348,20 @@ impl TokenContract {
         env.storage().persistent().get(&Balance(id)).unwrap_or(0)
     }
 
+    fn require_not_paused(env: &Env) -> Result<(), TokenError> {
+        if env.storage().instance().get(&Paused).unwrap_or(false) {
+            return Err(TokenError::Unauthorized);
+        }
+        Ok(())
+    }
+
     fn transfer_impl(
         env: Env,
         from: Address,
         to: Address,
         amount: i128,
     ) -> Result<(), TokenError> {
+        Self::require_not_paused(&env)?;
         if amount < 0 {
             return Err(TokenError::InsufficientBalance);
         }
