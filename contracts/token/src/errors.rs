@@ -31,3 +31,18 @@ pub enum TokenError {
     Overflow = 7,
     ExceedsMaxSupply = 6,
 }
+
+impl core::fmt::Display for TokenError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            TokenError::InsufficientBalance => write!(f, "insufficient balance"),
+            TokenError::InsufficientAllowance => write!(f, "insufficient allowance"),
+            TokenError::Unauthorized => write!(f, "unauthorized"),
+            TokenError::AlreadyInitialized => write!(f, "already initialized"),
+            TokenError::NotInitialized => write!(f, "not initialized"),
+            TokenError::InvalidAmount => write!(f, "invalid amount"),
+            TokenError::Overflow => write!(f, "arithmetic overflow"),
+            TokenError::ExceedsMaxSupply => write!(f, "exceeds max supply"),
+        }
+    }
+}
