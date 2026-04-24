@@ -4,12 +4,14 @@ use soroban_sdk::{contracttype, Address};
 #[derive(Clone)]
 pub enum DataKey {
     Admin,
+    PendingAdmin,
     Balance(Address),
     Allowance(AllowanceDataKey),
     Metadata(MetadataKey),
     TotalSupply,
     Paused,
     Version,
+    MaxSupply,
 }
 
 #[contracttype]

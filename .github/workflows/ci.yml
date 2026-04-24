@@ -39,14 +39,12 @@ jobs:
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Install Stellar CLI
-        run: cargo install --locked stellar-cli --features opt
-
       - name: Build all contracts
         run: |
           for dir in contracts/*/; do
             echo "Building $(basename $dir)..."
-            stellar contract build --manifest-path "$dir/Cargo.toml"
+            cargo build --manifest-path "$dir/Cargo.toml" --release --target wasm32-unknown-unknown
+            cargo build --manifest-path "$dir/Cargo.toml" --target wasm32-unknown-unknown --release
           done
 
       - name: Upload WASM artifacts

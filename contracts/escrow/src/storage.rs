@@ -26,6 +26,9 @@ pub enum EscrowState {
     Completed = 4,
     Refunded = 5,
     Cancelled = 6,
+    Completed = 3,
+    Refunded = 4,
+    Disputed = 5,
 }
 
 #[contracttype]
