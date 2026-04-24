@@ -25,12 +25,38 @@ fn bump_instance(env: &Env) {
 }
 
 /// Escrow contract for secure two-party transactions.
+///
+/// Lifecycle: `Created → Funded → Delivered → Completed`
+/// with side exits to `Refunded` (deadline-based) or `Cancelled` (pre-fund).
 #[contract]
 pub struct EscrowContract;
 
 #[contractimpl]
 impl EscrowContract {
     /// Initialize a new escrow.
+    ///
+    /// Sets up all parties, the token contract, the escrowed amount, and the
+    /// deadline. Must be called exactly once.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::AlreadyInitialized`] – contract has already been initialized.
+    /// - [`EscrowError::InvalidAmount`] – `amount` is zero or negative.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `deadline_ledger` is less than
+    /// `env.ledger().sequence() + MIN_DEADLINE_BUFFER`.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.initialize(
+    ///     &buyer, &seller, &arbiter, &token_id,
+    ///     &1_000_0000000i128,
+    ///     &(env.ledger().sequence() + 10_000),
+    /// );
+    /// ```
     pub fn initialize(
         env: Env,
         buyer: Address,
@@ -64,6 +90,24 @@ impl EscrowContract {
     }
 
     /// Buyer funds the escrow by transferring tokens to the contract.
+    ///
+    /// Requires authorization from the buyer. The escrow must be in the
+    /// `Created` state.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in `Created` state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `buyer.require_auth()` fails or if the token transfer fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.fund(); // called by buyer
+    /// ```
     pub fn fund(env: Env) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -89,6 +133,24 @@ impl EscrowContract {
     }
 
     /// Seller marks goods/services as delivered.
+    ///
+    /// Requires authorization from the seller. The escrow must be in the
+    /// `Funded` state.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in `Funded` state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `seller.require_auth()` fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.mark_delivered(); // called by seller
+    /// ```
     pub fn mark_delivered(env: Env) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -108,6 +170,24 @@ impl EscrowContract {
     }
 
     /// Buyer approves delivery, releasing funds to the seller.
+    ///
+    /// Requires authorization from the buyer. The escrow must be in the
+    /// `Delivered` state.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in `Delivered` state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `buyer.require_auth()` fails or if the token transfer fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.approve_delivery(); // called by buyer after delivery
+    /// ```
     pub fn approve_delivery(env: Env) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -124,6 +204,26 @@ impl EscrowContract {
     }
 
     /// Buyer requests a refund after the deadline has passed.
+    ///
+    /// Requires authorization from the buyer. The escrow must be in `Funded`
+    /// or `Delivered` state and the current ledger must be past `deadline`.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::DeadlineNotReached`] – deadline has not yet passed or
+    ///   the escrow is in an ineligible state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `buyer.require_auth()` fails or if the token transfer fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// // Advance ledger past deadline, then:
+    /// escrow_client.request_refund(); // called by buyer
+    /// ```
     pub fn request_refund(env: Env) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -142,6 +242,28 @@ impl EscrowContract {
     }
 
     /// Arbiter resolves a dispute.
+    ///
+    /// Requires authorization from the arbiter. The escrow must be in `Funded`
+    /// or `Delivered` state.
+    ///
+    /// If `release_to_seller` is `true`, funds go to the seller; otherwise
+    /// they are refunded to the buyer.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in a disputable state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `arbiter.require_auth()` fails or if the token transfer fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.resolve_dispute(&true);  // release to seller
+    /// escrow_client.resolve_dispute(&false); // refund to buyer
+    /// ```
     pub fn resolve_dispute(env: Env, release_to_seller: bool) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -161,6 +283,25 @@ impl EscrowContract {
     }
 
     /// Buyer partially releases `amount` tokens to the seller.
+    ///
+    /// Requires authorization from the buyer. The escrow must be in `Funded`
+    /// or `Delivered` state.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in an eligible state.
+    /// - [`EscrowError::InsufficientFunds`] – `amount` exceeds the escrowed balance.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `buyer.require_auth()` fails or if the token transfer fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.release_partial(&250_0000000i128);
+    /// ```
     pub fn release_partial(env: Env, amount: i128) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -190,7 +331,24 @@ impl EscrowContract {
         Ok(())
     }
 
-    /// Buyer cancels an unfunded escrow (Created state only).
+    /// Buyer cancels an unfunded escrow (`Created` state only).
+    ///
+    /// Requires authorization from the buyer.
+    ///
+    /// # Errors
+    ///
+    /// - [`EscrowError::NotInitialized`] – contract has not been initialized.
+    /// - [`EscrowError::InvalidState`] – escrow is not in `Created` state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `buyer.require_auth()` fails.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.cancel(); // called by buyer before funding
+    /// ```
     pub fn cancel(env: Env) -> Result<(), EscrowError> {
         let state: EscrowState = env
             .storage()
@@ -210,6 +368,16 @@ impl EscrowContract {
     }
 
     /// Extend storage TTL. Anyone can call this to keep an active escrow alive.
+    ///
+    /// # Panics
+    ///
+    /// Panics with `"Not initialized"` if the contract has not been initialized.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// escrow_client.bump(); // extend TTL before it expires
+    /// ```
     pub fn bump(env: Env) {
         if !env.storage().instance().has(&State) {
             panic!("Not initialized");
@@ -217,7 +385,18 @@ impl EscrowContract {
         bump_instance(&env);
     }
 
-    /// Return full escrow details.
+    /// Return full escrow details as an [`EscrowInfo`] struct.
+    ///
+    /// # Panics
+    ///
+    /// Panics if any required storage key is absent (contract not initialized).
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let info: EscrowInfo = escrow_client.get_escrow_info();
+    /// assert_eq!(info.state, EscrowState::Funded);
+    /// ```
     pub fn get_escrow_info(env: Env) -> EscrowInfo {
         EscrowInfo {
             buyer: env.storage().instance().get(&Buyer).unwrap(),
@@ -230,12 +409,29 @@ impl EscrowContract {
         }
     }
 
-    /// Return the current escrow state.
+    /// Return the current [`EscrowState`], or `None` if not initialized.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let state: Option<EscrowState> = escrow_client.get_state();
+    /// ```
     pub fn get_state(env: Env) -> Option<EscrowState> {
         env.storage().instance().get(&State)
     }
 
-    /// Return true if the deadline ledger has been passed.
+    /// Return `true` if the deadline ledger has been passed.
+    ///
+    /// Returns `false` if the contract has not been initialized (deadline
+    /// defaults to `0`).
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// if escrow_client.is_deadline_passed() {
+    ///     escrow_client.request_refund();
+    /// }
+    /// ```
     pub fn is_deadline_passed(env: Env) -> bool {
         let deadline: u32 = env.storage().instance().get(&Deadline).unwrap_or(0);
         env.ledger().sequence() > deadline
