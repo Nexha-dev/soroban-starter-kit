@@ -86,6 +86,34 @@ Start a local Stellar node with Soroban RPC:
 docker compose up stellar-node
 ```
 
+## ⚠️ Error Reference
+
+### Token Contract Errors (`TokenError`)
+
+| Code | Name | Description |
+|------|------|-------------|
+| 1 | `InsufficientBalance` | Caller's balance is too low to complete the transfer or burn |
+| 2 | `InsufficientAllowance` | Approved allowance is too low for the requested `transfer_from` amount |
+| 3 | `Unauthorized` | Caller is not the admin or does not have permission for this operation |
+| 4 | `AlreadyInitialized` | `initialize` was called on a contract that has already been set up |
+| 5 | `NotInitialized` | An operation was attempted before the contract was initialized |
+| 6 | `InvalidAmount` | Amount is zero, negative, or exceeds the configured max supply |
+| 7 | `Overflow` | Arithmetic overflow occurred during a balance or supply calculation |
+
+### Escrow Contract Errors (`EscrowError`)
+
+| Code | Name | Description |
+|------|------|-------------|
+| 1 | `NotAuthorized` | Caller is not permitted to invoke this function (wrong party or arbiter) |
+| 2 | `InvalidState` | The escrow is not in the required state for this operation |
+| 3 | `DeadlinePassed` | The escrow deadline has already elapsed; the operation is no longer valid |
+| 4 | `DeadlineNotReached` | The deadline has not yet passed; premature refund or timeout claim attempted |
+| 5 | `AlreadyInitialized` | `initialize` was called on an escrow that is already set up |
+| 6 | `NotInitialized` | An operation was attempted before the escrow was initialized |
+| 7 | `InsufficientFunds` | The escrow account does not hold enough tokens to complete the operation |
+| 8 | `InvalidAmount` | The specified amount is zero or otherwise invalid |
+| 9 | `InvalidParties` | Buyer, seller, or arbiter addresses are invalid or conflict with each other |
+
 ## 🤝 Contributing
 
 We welcome contributions! Please:
