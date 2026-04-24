@@ -44,6 +44,7 @@ impl TokenContract {
         name: String,
         symbol: String,
         decimals: u32,
+        max_supply: Option<i128>,
     ) -> Result<(), TokenError> {
         if env.storage().instance().has(&Admin) {
             return Err(TokenError::AlreadyInitialized);
@@ -54,6 +55,10 @@ impl TokenContract {
         env.storage().instance().set(&Metadata(SymbolKey), &symbol);
         env.storage().instance().set(&Metadata(Decimals), &decimals);
         env.storage().instance().set(&TotalSupply, &0i128);
+        // Issue #196: Store max_supply if provided
+        if let Some(max) = max_supply {
+            env.storage().instance().set(&DataKey::MaxSupply, &max);
+        }
         bump_instance(&env);
         events::initialized(&env, &admin, name, symbol, decimals);
         Ok(())
@@ -68,9 +73,16 @@ impl TokenContract {
         }
         let balance = Self::balance_of(env.clone(), to.clone());
         let new_balance = balance.checked_add(amount).ok_or(TokenError::InsufficientBalance)?;
+        // Issue #196: Check max_supply cap
+        let supply: i128 = env.storage().instance().get(&TotalSupply).unwrap_or(0);
+        if let Some(max_supply) = env.storage().instance().get::<_, i128>(&DataKey::MaxSupply) {
+            let new_supply = supply.checked_add(amount).ok_or(TokenError::InsufficientBalance)?;
+            if new_supply > max_supply {
+                return Err(TokenError::ExceedsMaxSupply);
+            }
+        }
         env.storage().persistent().set(&Balance(to.clone()), &new_balance);
         bump_persistent(&env, &Balance(to.clone()));
-        let supply: i128 = env.storage().instance().get(&TotalSupply).unwrap_or(0);
         env.storage().instance().set(&TotalSupply, &(supply + amount));
         bump_instance(&env);
         events::minted(&env, &to, amount);
@@ -81,6 +93,8 @@ impl TokenContract {
     pub fn burn_admin(env: Env, from: Address, amount: i128) -> Result<(), TokenError> {
         let admin = require_admin(&env)?;
         admin.require_auth();
+        // Issue #199: Require authorization from token holder
+        from.require_auth();
         if amount < 0 {
             return Err(TokenError::InsufficientBalance);
         }
@@ -108,12 +122,39 @@ impl TokenContract {
         Ok(())
     }
 
+    /// Issue #197: Propose a new admin (two-step transfer)
+    pub fn propose_admin(env: Env, new_admin: Address) -> Result<(), TokenError> {
+        let admin = require_admin(&env)?;
+        admin.require_auth();
+        env.storage().instance().set(&DataKey::PendingAdmin, &new_admin);
+        bump_instance(&env);
+        Ok(())
+    }
+
+    /// Issue #197: Accept admin role (completes two-step transfer)
+    pub fn accept_admin(env: Env) -> Result<(), TokenError> {
+        let pending_admin: Address = env.storage().instance()
+            .get(&DataKey::PendingAdmin)
+            .ok_or(TokenError::NotInitialized)?;
+        pending_admin.require_auth();
+        env.storage().instance().set(&Admin, &pending_admin);
+        env.storage().instance().remove(&DataKey::PendingAdmin);
+        bump_instance(&env);
+        events::admin_set(&env, &pending_admin);
+        Ok(())
+    }
+
     pub fn admin(env: Env) -> Address {
         env.storage().instance().get(&Admin).unwrap()
     }
 
     pub fn total_supply(env: Env) -> i128 {
         env.storage().instance().get(&TotalSupply).unwrap_or(0)
+    }
+
+    /// Issue #196: Get the maximum supply cap
+    pub fn max_supply(env: Env) -> Option<i128> {
+        env.storage().instance().get(&DataKey::MaxSupply)
     }
 
     // ── Soroban TokenInterface methods ────────────────────────────────────
@@ -183,13 +224,16 @@ impl TokenContract {
         if env.ledger().sequence() > val.expiration_ledger || val.amount < amount {
             panic_with_error!(&env, TokenError::InsufficientAllowance);
         }
+        let new_allowance = val.amount - amount;
         env.storage().temporary().set(
             &key,
             &AllowanceValue {
-                amount: val.amount - amount,
+                amount: new_allowance,
                 expiration_ledger: val.expiration_ledger,
             },
         );
+        // Issue #198: Emit approve event with updated allowance
+        events::approved(&env, &from, &spender, new_allowance);
         if let Err(e) = Self::transfer_impl(env.clone(), from, to, amount) {
             panic_with_error!(&env, e);
         }

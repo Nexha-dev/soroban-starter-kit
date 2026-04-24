@@ -16,6 +16,7 @@ fn init_token<'a>(env: &'a Env, admin: &Address) -> TokenContractClient<'a> {
         &String::from_str(env, "Test Token"),
         &String::from_str(env, "TEST"),
         &18u32,
+        &None,
     );
     client
 }
@@ -32,7 +33,7 @@ fn test_initialize() {
     let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
-    client.initialize(&admin, &name, &symbol, &decimals);
+    client.initialize(&admin, &name, &symbol, &decimals, &None);
 
     assert_eq!(client.admin(), admin);
     assert_eq!(client.name(), name);
@@ -54,8 +55,8 @@ fn test_initialize_twice() {
     let symbol = String::from_str(&env, "TEST");
     let decimals = 18u32;
 
-    client.initialize(&admin, &name, &symbol, &decimals);
-    client.initialize(&admin, &name, &symbol, &decimals);
+    client.initialize(&admin, &name, &symbol, &decimals, &None);
+    client.initialize(&admin, &name, &symbol, &decimals, &None);
 }
 
 #[test]

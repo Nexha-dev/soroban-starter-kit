@@ -8,4 +8,5 @@ pub enum TokenError {
     Unauthorized = 3,
     AlreadyInitialized = 4,
     NotInitialized = 5,
+    ExceedsMaxSupply = 6,
 }
