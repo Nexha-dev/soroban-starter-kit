@@ -5,12 +5,12 @@ terraform {
     # Extend with a real provider (e.g. aws, google, azurerm) as needed.
   }
 
-  # Uncomment and configure a remote backend for team use:
-  # backend "s3" {
-  #   bucket = "your-tfstate-bucket"
-  #   key    = "soroban-starter-kit/terraform.tfstate"
-  #   region = "us-east-1"
-  # }
+  # Backend config is supplied at init time via -backend-config flags in CI.
+  # Required secrets: TF_STATE_BUCKET (S3 bucket name), TF_LOCK_TABLE (DynamoDB table name).
+  backend "s3" {
+    # bucket, key, region, and dynamodb_table are injected by CI via -backend-config
+    encrypt = true
+  }
 }
 
 # ---------------------------------------------------------------------------

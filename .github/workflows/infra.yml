@@ -1,27 +1,16 @@
-name: Infrastructure
 name: Infra
 
 on:
   push:
     branches: [main]
     paths:
-      - 'infra/terraform/**'
+      - 'infra/**'
+      - '.github/workflows/infra.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'infra/terraform/**'
-  workflow_dispatch:
-
-env:
-  TF_WORKING_DIR: infra/terraform
-
-jobs:
-  terraform-validate:
-    name: Validate
-    paths: ['infra/**', 'scripts/infra.sh']
-  pull_request:
-    branches: [main]
-    paths: ['infra/**', 'scripts/infra.sh']
+      - 'infra/**'
+      - '.github/workflows/infra.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -46,61 +35,40 @@ jobs:
 env:
   TF_VERSION: '1.7.5'
   TF_IN_AUTOMATION: 'true'
+  TF_WORKING_DIR: infra/terraform
+
+permissions:
+  id-token: write   # required for OIDC token request
+  contents: read
 
 jobs:
-  # ── Compliance & validation (always runs) ──────────────────────────────────
   compliance:
     name: Compliance Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.5"
-
-      - name: Terraform Init
-        run: terraform init -backend=false
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-  terraform-plan:
-    name: Plan
-    runs-on: ubuntu-latest
-    needs: terraform-validate
-    if: github.event_name == 'pull_request'
-    env:
-      TF_VAR_network_passphrase: ${{ secrets.STELLAR_NETWORK_PASSPHRASE }}
-      TF_VAR_environment: testnet
-      - name: Run compliance checks
-        run: bash scripts/infra.sh compliance
-
-      - name: Validate Terraform syntax
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: terraform fmt check
-        run: terraform fmt -check -recursive infra/terraform
+        run: terraform fmt -check -recursive ${{ env.TF_WORKING_DIR }}
 
-      - name: terraform validate (staging)
+      - name: terraform validate
         run: |
-          terraform -chdir=infra/terraform/envs/staging init -backend=false
-          terraform -chdir=infra/terraform/envs/staging validate
+          terraform -chdir=${{ env.TF_WORKING_DIR }} init -backend=false
+          terraform -chdir=${{ env.TF_WORKING_DIR }} validate
 
-  # ── Plan (PRs and pushes) ──────────────────────────────────────────────────
+  # ── Plan (PRs, pushes, and manual plan trigger) ────────────────────────────
   plan:
     name: Plan (${{ github.event.inputs.environment || 'staging' }})
     runs-on: ubuntu-latest
     needs: compliance
+    if: >
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
     env:
       ENV: ${{ github.event.inputs.environment || 'staging' }}
       CLOUD: ${{ github.event.inputs.cloud || 'aws' }}
@@ -111,14 +79,19 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         if: env.CLOUD == 'aws'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            us-east-1
-        continue-on-error: true   # skip if secrets not configured
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Cache .terraform
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_WORKING_DIR }}/.terraform
+          key: terraform-${{ runner.os }}-${{ hashFiles(format('{0}/.terraform.lock.hcl', env.TF_WORKING_DIR)) }}
+          restore-keys: terraform-${{ runner.os }}-
 
       - name: terraform init
         run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} init -input=false -backend=false
@@ -131,91 +104,114 @@ jobs:
             -no-color \
             -out=tfplan
         continue-on-error: true
-    paths:
-      - 'infra/**'
-      - '.github/workflows/infra.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'infra/**'
-      - '.github/workflows/infra.yml'
-  workflow_dispatch:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            us-east-1
+        continue-on-error: true
 
-env:
-  TF_VERSION: "1.8.0"
-  TF_WORKING_DIR: infra
-
-jobs:
-  plan:
-    name: Terraform Plan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.5"
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Terraform Plan
-        run: terraform plan -no-color -out=tfplan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Upload plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ env.TF_WORKING_DIR }}/tfplan
-          retention-days: 3
-
-  terraform-apply:
-    name: Apply
-    runs-on: ubuntu-latest
-    needs: terraform-validate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-    env:
-      TF_VAR_network_passphrase: ${{ secrets.STELLAR_NETWORK_PASSPHRASE }}
-      TF_VAR_environment: mainnet
-          terraform_version: ${{ env.TF_VERSION }}
-
-      # Cache the .terraform directory so the apply job uses the exact same
-      # provider binaries — prevents "saved plan is stale" errors.
       - name: Cache .terraform
         uses: actions/cache@v4
         with:
           path: ${{ env.TF_WORKING_DIR }}/.terraform
           key: terraform-${{ runner.os }}-${{ hashFiles(format('{0}/.terraform.lock.hcl', env.TF_WORKING_DIR)) }}
-          restore-keys: |
-            terraform-${{ runner.os }}-
+          restore-keys: terraform-${{ runner.os }}-
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
+      - name: terraform init
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} init \
+            -input=false \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=soroban-starter-kit/${{ env.ENV }}/terraform.tfstate" \
+            -backend-config="region=us-east-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
 
-      - name: Terraform Plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -input=false -out=tfplan
+      - name: terraform plan
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} plan \
+            -var="cloud=${{ env.CLOUD }}" \
+            -var="environment=${{ env.ENV }}" \
+            -input=false \
+            -no-color \
+            -out=tfplan
 
       - name: Upload plan artifact
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ env.ENV }}
-          path: infra/terraform/envs/${{ env.ENV }}/tfplan
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
           retention-days: 7
 
-  # ── Apply (manual trigger, production requires approval) ──────────────────
+  # ── Apply (manual trigger only) ────────────────────────────────────────────
   apply:
     name: Apply (${{ github.event.inputs.environment }})
     runs-on: ubuntu-latest
     needs: plan
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
     environment:
-      name: ${{ github.event.inputs.environment }}   # maps to GitHub environment with protection rules
+      name: ${{ github.event.inputs.environment }}
+    env:
+      ENV: ${{ github.event.inputs.environment }}
+      CLOUD: ${{ github.event.inputs.cloud }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        if: env.CLOUD == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Restore .terraform cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_WORKING_DIR }}/.terraform
+          key: terraform-${{ runner.os }}-${{ hashFiles(format('{0}/.terraform.lock.hcl', env.TF_WORKING_DIR)) }}
+          restore-keys: terraform-${{ runner.os }}-
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+      - name: Restore .terraform cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_WORKING_DIR }}/.terraform
+          key: terraform-${{ runner.os }}-${{ hashFiles(format('{0}/.terraform.lock.hcl', env.TF_WORKING_DIR)) }}
+          restore-keys: terraform-${{ runner.os }}-
+
+      - name: terraform init
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} init \
+            -input=false \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=soroban-starter-kit/${{ env.ENV }}/terraform.tfstate" \
+            -backend-config="region=us-east-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.ENV }}
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: terraform apply
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -input=false tfplan
+
+      - name: Print outputs
+        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} output -json
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} output -json
+
+  # ── Destroy (manual trigger only) ─────────────────────────────────────────
+  destroy:
+    name: Destroy (${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    needs: compliance
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    environment:
+      name: ${{ github.event.inputs.environment }}
     env:
       ENV: ${{ github.event.inputs.environment }}
       CLOUD: ${{ github.event.inputs.cloud }}
@@ -234,64 +230,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            us-east-1
 
-      - name: Download plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-${{ env.ENV }}
-          path: infra/terraform/envs/${{ env.ENV }}
-
       - name: terraform init
-        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} init -input=false
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} init \
+            -input=false \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=soroban-starter-kit/${{ env.ENV }}/terraform.tfstate" \
+            -backend-config="region=us-east-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
 
-      - name: terraform apply
-        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} apply -input=false tfplan
-
-      - name: Print outputs
-        run: terraform -chdir=infra/terraform/envs/${{ env.ENV }} output -json
-          name: tfplan
-          path: ${{ env.TF_WORKING_DIR }}/tfplan
-          retention-days: 1
-
-  apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    needs: plan
-    # Only apply on pushes to main, not on PRs
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.5"
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: ${{ env.TF_WORKING_DIR }}
-          terraform_version: ${{ env.TF_VERSION }}
-
-      # Restore the same .terraform directory from the plan job — no re-init needed.
-      - name: Restore .terraform cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.TF_WORKING_DIR }}/.terraform
-          key: terraform-${{ runner.os }}-${{ hashFiles(format('{0}/.terraform.lock.hcl', env.TF_WORKING_DIR)) }}
-          restore-keys: |
-            terraform-${{ runner.os }}-
-
-      - name: Download plan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ env.TF_WORKING_DIR }}
-
-      # Apply uses the downloaded plan directly — no terraform init re-run.
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -input=false tfplan
+      - name: terraform destroy
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} destroy \
+            -var="cloud=${{ env.CLOUD }}" \
+            -var="environment=${{ env.ENV }}" \
+            -input=false \
+            -auto-approve

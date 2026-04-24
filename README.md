@@ -11,7 +11,7 @@ cd soroban-contract-templates
 
 # Build a contract (example: token)
 cd contracts/token
-soroban contract build
+stellar contract build
 
 # Deploy to testnet
 ./scripts/deploy.sh testnet
@@ -61,7 +61,7 @@ Each template includes:
 
 ```bash
 cd contracts/[template-name]
-soroban contract build
+stellar contract build
 ```
 
 ### Running Tests
@@ -116,11 +116,7 @@ docker compose up stellar-node
 
 ## 🤝 Contributing
 
-We welcome contributions! Please:
-- Add new contract templates following the existing structure
-- Include comprehensive tests for all functionality
-- Provide clear documentation and usage examples
-- Follow Rust and Soroban best practices
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, test commands, code style, and the PR process.
 
 ## 📚 Resources
 

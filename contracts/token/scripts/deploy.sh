@@ -13,11 +13,11 @@ echo "🚀 Deploying Token Contract to $NETWORK..."
 
 # Build the contract
 echo "📦 Building contract..."
-soroban contract build
+stellar contract build
 
 # Deploy the contract
 echo "🌐 Deploying to $NETWORK..."
-CONTRACT_ID=$(soroban contract deploy \
+CONTRACT_ID=$(stellar contract deploy \
     --wasm target/wasm32-unknown-unknown/release/${CONTRACT_NAME}.wasm \
     --network $NETWORK)
 
@@ -28,7 +28,7 @@ echo "📋 Contract ID: $CONTRACT_ID"
 echo "🔧 Initializing contract..."
 ADMIN_ADDRESS="GDXY2OEZQHIFKHDN7SWZQYN3JGMVGXD3UYEQMY4FIBWMHQPD5NEKZFIN"
 
-soroban contract invoke \
+stellar contract invoke \
     --id $CONTRACT_ID \
     --network $NETWORK \
     -- initialize \
